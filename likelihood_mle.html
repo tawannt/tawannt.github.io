@@ -2,120 +2,141 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Likelihood + MLE</title>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <style>
+    /* Toàn bộ nền đen, chữ sáng */
     body {
-      font-family: Georgia, serif;
-      line-height: 1.6;
-      margin: 40px;
-      max-width: 900px;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0d1117; /* đen kiểu GitHub dark */
+      color: #e6edf3;
+      line-height: 1.7;
+      font-size: 18px;
     }
-    nav {
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 40px 20px;
+    }
+
+    h1, h2, h3 {
+      color: #58a6ff;
+    }
+
+    h1 {
+      font-size: 2.2em;
       margin-bottom: 20px;
     }
-    nav a {
+
+    h2 {
+      margin-top: 40px;
+      font-size: 1.6em;
+      border-bottom: 2px solid #30363d;
+      padding-bottom: 8px;
+    }
+
+    p {
+      margin-bottom: 16px;
+    }
+
+    /* Công thức toán hiển thị đẹp hơn */
+    .math {
+      display: block;
+      text-align: center;
+      margin: 20px 0;
+      font-size: 1.2em;
+      background: #161b22;
+      padding: 12px;
+      border-radius: 8px;
+    }
+
+    /* Danh sách */
+    ul, ol {
+      padding-left: 25px;
+    }
+
+    li {
+      margin: 10px 0;
+    }
+
+    /* Link về Home */
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #8b949e;
       text-decoration: none;
-      color: blue;
-      margin-right: 15px;
+      transition: color 0.2s;
     }
-    nav a:hover {
-      color: red;
+
+    .back-link:hover {
+      color: #58a6ff;
     }
-    h1, h2, h3 {
-      color: #333;
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      body {
+        font-size: 16px;
+      }
     }
   </style>
+
+  <!-- MathJax để render công thức -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
-  <h1>Likelihood + MLE</h1>
-  <nav>
-    <a href="index.html">⬅ Back to Home</a>
-  </nav>
+  <div class="container">
+    <a href="index.html" class="back-link">← Back to Home</a>
+    <h1>What is Likelihood?</h1>
 
-  <!-- What is Likelihood -->
-  <h2>What is Likelihood?</h2>
+    <h2>Continuous Variables</h2>
+    <p>
+      For a <b>discrete random variable</b>, we can represent the probability of \(X\) taking a specific value \(x\) as:
+    </p>
+    <div class="math">P(X = x)</div>
 
-  <h3>Continuous Variables</h3>
-  <p>
-    For a <b>discrete random variable</b>, we can represent the probability of \(X\) 
-    taking a specific value \(x\) as:
-    \[
-    P(X = x),
-    \]
-    which can take any value in \([0,1]\).
-  </p>
+    <p>which can take any value in \([0,1]\).</p>
 
-  <p>
-    However, for a <b>continuous random variable</b>, the probability that \(X\) 
-    equals exactly one point is essentially zero:
-    \[
-    P(X = x) = 0.
-    \]
-    Instead, we describe probabilities over an <i>interval</i>:
-    \[
-    P(x_1 \leq X \leq x_2).
-    \]
-  </p>
+    <p>
+      However, for a <b>continuous random variable</b>, the probability that \(X\) equals exactly one point is essentially zero:
+    </p>
+    <div class="math">P(X = x) = 0</div>
 
-  <p>
-    To compute such probabilities, we introduce the <b>Probability Density Function (pdf)</b> \(f(x)\), 
-    which satisfies:
-  </p>
+    <p>
+      Instead, we describe probabilities over an <i>interval</i>:
+    </p>
+    <div class="math">P(x_1 \leq X \leq x_2)</div>
 
-  <ol>
-    <li>
-      For any interval \([x_1, x_2]\):
-      \[
-      P(x_1 \leq X \leq x_2) = \int_{x_1}^{x_2} f(x)\,dx.
-      \]
-    </li>
-    <li>
-      For all \(x\), \(f(x) \geq 0\), and
-      \[
-      \int_{-\infty}^{\infty} f(x)\,dx = 1.
-      \]
-    </li>
-  </ol>
+    <p>To compute such probabilities, we introduce the <b>Probability Density Function (pdf)</b> \(f(x)\), which satisfies:</p>
 
-  <p>
-    In other words, the probability of \(X\) falling within an interval is the 
-    <b><i>area under the curve</i></b> of \(f(x)\) across that interval.
-  </p>
+    <ol>
+      <li>For any interval \([x_1, x_2]\):  
+        <div class="math">P(x_1 \leq X \leq x_2) = \int_{x_1}^{x_2} f(x)\,dx</div>
+      </li>
+      <li>For all \(x\), \(f(x) \geq 0\), and  
+        <div class="math">\int_{-\infty}^{\infty} f(x)\,dx = 1</div>
+      </li>
+    </ol>
 
-  <p>
-    Since \(f(x) \geq 0\), this interpretation is always consistent:  
-    small \(f(x)\) → small probability;  
-    large \(f(x)\) → large probability.
-  </p>
+    <p>
+      In other words, the probability of \(X\) falling within an interval is the <b>area under the curve</b> of \(f(x)\) across that interval.
+    </p>
 
-  <p>
-    Now, suppose we observe \(n\) independent samples 
-    \(x_1, x_2, \dots, x_n\) from the same distribution with pdf \(f(x)\).  
-    The joint probability density of these samples is:
-    \[
-    P(X_1 = x_1, \dots, X_n = x_n) \propto \prod_{i=1}^n f(x_i).
-    \]
-  </p>
+    <p>
+      Now, suppose we observe \(n\) independent samples \(x_1, x_2, \dots, x_n\) from the same distribution with pdf \(f(x)\).
+      The joint probability density of these samples is:
+    </p>
 
-  <p>
-    This product is called the <b>Likelihood Function</b>, central to parameter estimation:
-    \[
-    L(\theta) = \prod_{i=1}^n f(x_i \mid \theta),
-    \]
-    where \(\theta\) denotes the parameter(s) of the pdf \(f\).
-  </p>
+    <div class="math">
+      P(X_1 = x_1, \dots, X_n = x_n) \propto \prod_{i=1}^n f(x_i)
+    </div>
 
-  <!-- Placeholder for meaning -->
-  <h3>The meaning of Likelihood Function</h3>
-  <p>
-    (Nội dung sẽ viết thêm giải thích tại đây...)
-  </p>
-
-  <h3>The meaning of Maximum Likelihood Estimation</h3>
-  <p>
-    (Nội dung sẽ viết thêm giải thích tại đây...)
-  </p>
-
+    <p>This product is called the <b>Likelihood Function</b>:</p>
+    <div class="math">
+      L(\theta) = \prod_{i=1}^n f(x_i \mid \theta)
+    </div>
+  </div>
 </body>
 </html>
