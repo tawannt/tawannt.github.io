@@ -4,139 +4,127 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Likelihood + MLE</title>
-  <style>
-    /* Toàn bộ nền đen, chữ sáng */
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #0d1117; /* đen kiểu GitHub dark */
-      color: #e6edf3;
-      line-height: 1.7;
-      font-size: 18px;
-    }
 
-    .container {
-      max-width: 1000px;
+  <!-- Font giống Chip Huyen (serif) -->
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather&display=swap" rel="stylesheet">
+
+  <!-- MathJax để hiển thị công thức LaTeX -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <style>
+    body {
+      font-family: 'Merriweather', serif;
+      background-color: #121212;  /* nền đen */
+      color: #f0f0f0;             /* chữ trắng nhạt */
+      line-height: 1.6;
+      max-width: 900px;
       margin: auto;
-      padding: 40px 20px;
+      padding: 2rem;
     }
 
     h1, h2, h3 {
-      color: #58a6ff;
+      color: #ffffff;
     }
 
-    h1 {
-      font-size: 2.2em;
-      margin-bottom: 20px;
-    }
-
-    h2 {
-      margin-top: 40px;
-      font-size: 1.6em;
-      border-bottom: 2px solid #30363d;
-      padding-bottom: 8px;
-    }
-
-    p {
-      margin-bottom: 16px;
-    }
-
-    /* Công thức toán hiển thị đẹp hơn */
-    .math {
-      display: block;
-      text-align: center;
-      margin: 20px 0;
-      font-size: 1.2em;
-      background: #161b22;
-      padding: 12px;
-      border-radius: 8px;
-    }
-
-    /* Danh sách */
-    ul, ol {
-      padding-left: 25px;
-    }
-
-    li {
-      margin: 10px 0;
-    }
-
-    /* Link về Home */
-    .back-link {
-      display: inline-block;
-      margin-bottom: 20px;
-      color: #8b949e;
+    a {
+      color: #80bfff;
       text-decoration: none;
-      transition: color 0.2s;
+    }
+    a:hover {
+      text-decoration: underline;
     }
 
-    .back-link:hover {
-      color: #58a6ff;
-    }
-
-    /* Responsive */
-    @media (max-width: 600px) {
-      body {
-        font-size: 16px;
-      }
+    .math-block {
+      background: #1e1e1e;
+      padding: 10px;
+      border-radius: 8px;
+      overflow-x: auto;
     }
   </style>
-
-  <!-- MathJax để render công thức -->
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
-  <div class="container">
-    <a href="index.html" class="back-link">← Back to Home</a>
-    <h1>What is Likelihood?</h1>
 
-    <h2>Continuous Variables</h2>
-    <p>
-      For a <b>discrete random variable</b>, we can represent the probability of \(X\) taking a specific value \(x\) as:
-    </p>
-    <div class="math">P(X = x)</div>
+  <a href="index.html">← Back to Home</a>
+  <h1>What is Likelihood?</h1>
 
-    <p>which can take any value in \([0,1]\).</p>
+  <h2>Continuous Variables</h2>
 
-    <p>
-      However, for a <b>continuous random variable</b>, the probability that \(X\) equals exactly one point is essentially zero:
-    </p>
-    <div class="math">P(X = x) = 0</div>
+  <p>
+    For a <b>discrete random variable</b>, the probability of \(X\) taking a specific value \(x\) is
+  </p>
 
-    <p>
-      Instead, we describe probabilities over an <i>interval</i>:
-    </p>
-    <div class="math">P(x_1 \leq X \leq x_2)</div>
-
-    <p>To compute such probabilities, we introduce the <b>Probability Density Function (pdf)</b> \(f(x)\), which satisfies:</p>
-
-    <ol>
-      <li>For any interval \([x_1, x_2]\):  
-        <div class="math">P(x_1 \leq X \leq x_2) = \int_{x_1}^{x_2} f(x)\,dx</div>
-      </li>
-      <li>For all \(x\), \(f(x) \geq 0\), and  
-        <div class="math">\int_{-\infty}^{\infty} f(x)\,dx = 1</div>
-      </li>
-    </ol>
-
-    <p>
-      In other words, the probability of \(X\) falling within an interval is the <b>area under the curve</b> of \(f(x)\) across that interval.
-    </p>
-
-    <p>
-      Now, suppose we observe \(n\) independent samples \(x_1, x_2, \dots, x_n\) from the same distribution with pdf \(f(x)\).
-      The joint probability density of these samples is:
-    </p>
-
-    <div class="math">
-      P(X_1 = x_1, \dots, X_n = x_n) \propto \prod_{i=1}^n f(x_i)
-    </div>
-
-    <p>This product is called the <b>Likelihood Function</b>:</p>
-    <div class="math">
-      L(\theta) = \prod_{i=1}^n f(x_i \mid \theta)
-    </div>
+  <div class="math-block">
+    \[
+    P(X = x)
+    \]
   </div>
+
+  <p>
+    For a <b>continuous random variable</b>, the probability that \(X\) equals exactly one value is
+  </p>
+
+  <div class="math-block">
+    \[
+    P(X = x) = 0
+    \]
+  </div>
+
+  <p>
+    Instead, we describe probabilities over an <i>interval</i>:
+  </p>
+
+  <div class="math-block">
+    \[
+    P(x_1 \leq X \leq x_2)
+    \]
+  </div>
+
+  <p>
+    To compute such probabilities, we introduce the <b>Probability Density Function (pdf)</b> \(f(x)\), which satisfies:
+  </p>
+
+  <ol>
+    <li>
+      For any interval \([x_1, x_2]\):
+      <div class="math-block">
+        \[
+        P(x_1 \leq X \leq x_2) = \int_{x_1}^{x_2} f(x)\,dx
+        \]
+      </div>
+    </li>
+    <li>
+      For all \(x\), \(f(x) \geq 0\), and
+      <div class="math-block">
+        \[
+        \int_{-\infty}^{\infty} f(x)\,dx = 1
+        \]
+      </div>
+    </li>
+  </ol>
+
+  <p>
+    Suppose we observe \(n\) independent samples \(x_1, x_2, \dots, x_n\) from the same distribution.  
+    The joint density is
+  </p>
+
+  <div class="math-block">
+    \[
+    P(X_1 = x_1, \dots, X_n = x_n) \propto \prod_{i=1}^n f(x_i)
+    \]
+  </div>
+
+  <p>
+    This product is called the <b>Likelihood Function</b>:
+  </p>
+
+  <div class="math-block">
+    \[
+    L(\theta) = \prod_{i=1}^n f(x_i \mid \theta)
+    \]
+  </div>
+
 </body>
 </html>
