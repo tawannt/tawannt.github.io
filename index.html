@@ -1,10 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Trang web đầu tiên</title>
+  <meta charset="UTF-8">
+  <title>Likelihood & Autodiff</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    body {
+      max-width: 900px;
+      margin: auto;
+      font-family: Georgia, serif;
+      line-height: 1.6;
+      padding: 20px;
+    }
+    .section {
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+    }
+    .section h2 {
+      margin: 0;
+      padding: 12px;
+      background: #f2f2f2;
+      cursor: pointer;
+    }
+    .content {
+      display: none;
+      padding: 15px;
+    }
+    pre {
+      background: #f7f7f7;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
 </head>
 <body>
-    <h1>Xin chào! Đây là website của mình 🚀</h1>
-    <p>Làm bằng GitHub Pages</p>
+
+  <h1>📘 Study Notes</h1>
+
+  <!-- Section 1 -->
+  <div class="section">
+    <h2 onclick="toggleContent(this)">What is Likelihood?</h2>
+    <div class="content">
+      <p>For a <b>discrete random variable</b>:</p>
+      <p>\[ P(X = x) \]</p>
+      <p>For a <b>continuous random variable</b>:</p>
+      <p>\[ P(X = x) = 0, \quad 
+      P(x_1 \leq X \leq x_2) = \int_{x_1}^{x_2} f(x)\,dx. \]</p>
+
+      <p>Likelihood Function:</p>
+      <p>\[ L(\theta) = \prod_{i=1}^n f(x_i \mid \theta) \]</p>
+    </div>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="section">
+    <h2 onclick="toggleContent(this)">Automatic Differentiation in PyTorch</h2>
+    <div class="content">
+      <p>Example with <code>torch</code>:</p>
+      <pre><code>
+import torch
+x = torch.arange(4.0, requires_grad=True)
+y = 2 * x * x
+y.backward()
+print(x.grad)  # tensor([0., 4., 8., 12.])
+      </code></pre>
+      <p>PyTorch computes gradients by reverse-mode autodiff.</p>
+    </div>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="section">
+    <h2 onclick="toggleContent(this)">Linear Regression</h2>
+    <div class="content">
+      <p>Closed form solution:</p>
+      <p>\[
+      \mathbf{w}^* = (\mathbf{X}^\top \mathbf{X})^{-1}\mathbf{X}^\top \mathbf{y}
+      \]</p>
+      <p>Also can be solved by minibatch SGD:</p>
+      <p>\[
+      (\mathbf{w}, b) \leftarrow (\mathbf{w}, b) - 
+      \frac{\eta}{|\mathcal{B}|} \sum_{i \in \mathcal{B}_t} 
+      \partial_{(\mathbf{w},b)} l^{(i)}(\mathbf{w}, b).
+      \]</p>
+    </div>
+  </div>
+
+  <script>
+    function toggleContent(el) {
+      const content = el.nextElementSibling;
+      content.style.display = content.style.display === "block" ? "none" : "block";
+    }
+  </script>
+
 </body>
 </html>
