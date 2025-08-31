@@ -2,98 +2,105 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Likelihood & Autodiff</title>
+  <title>Likelihood Notes</title>
+  <!-- MathJax để hiển thị công thức LaTeX -->
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <style>
     body {
-      max-width: 900px;
+      max-width: 800px;
       margin: auto;
       font-family: Georgia, serif;
       line-height: 1.6;
       padding: 20px;
     }
-    .section {
-      margin: 10px 0;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+    h1, h2 {
+      color: #2c3e50;
     }
-    .section h2 {
-      margin: 0;
-      padding: 12px;
-      background: #f2f2f2;
-      cursor: pointer;
-    }
-    .content {
-      display: none;
-      padding: 15px;
-    }
-    pre {
-      background: #f7f7f7;
-      padding: 10px;
-      border-radius: 5px;
-      overflow-x: auto;
+    ul, ol {
+      margin-left: 20px;
     }
   </style>
 </head>
 <body>
 
-  <h1>📘 Study Notes</h1>
+  <h1>What is Likelihood?</h1>
 
-  <!-- Section 1 -->
-  <div class="section">
-    <h2 onclick="toggleContent(this)">What is Likelihood?</h2>
-    <div class="content">
-      <p>For a <b>discrete random variable</b>:</p>
-      <p>\[ P(X = x) \]</p>
-      <p>For a <b>continuous random variable</b>:</p>
-      <p>\[ P(X = x) = 0, \quad 
-      P(x_1 \leq X \leq x_2) = \int_{x_1}^{x_2} f(x)\,dx. \]</p>
+  <h2>Continuous Variables</h2>
 
-      <p>Likelihood Function:</p>
-      <p>\[ L(\theta) = \prod_{i=1}^n f(x_i \mid \theta) \]</p>
-    </div>
-  </div>
+  <p>
+    For a <b>discrete random variable</b>, we can represent the probability of 
+    \(X\) taking a specific value \(x\) as:
+  </p>
+  <p>\[ P(X = x), \]</p>
+  <p>which can take any value in \([0,1]\).</p>
 
-  <!-- Section 2 -->
-  <div class="section">
-    <h2 onclick="toggleContent(this)">Automatic Differentiation in PyTorch</h2>
-    <div class="content">
-      <p>Example with <code>torch</code>:</p>
-      <pre><code>
-import torch
-x = torch.arange(4.0, requires_grad=True)
-y = 2 * x * x
-y.backward()
-print(x.grad)  # tensor([0., 4., 8., 12.])
-      </code></pre>
-      <p>PyTorch computes gradients by reverse-mode autodiff.</p>
-    </div>
-  </div>
+  <p>
+    However, for a <b>continuous random variable</b>, the probability that 
+    \(X\) equals exactly one point is essentially zero:
+  </p>
+  <p>\[ P(X = x) = 0. \]</p>
 
-  <!-- Section 3 -->
-  <div class="section">
-    <h2 onclick="toggleContent(this)">Linear Regression</h2>
-    <div class="content">
-      <p>Closed form solution:</p>
-      <p>\[
-      \mathbf{w}^* = (\mathbf{X}^\top \mathbf{X})^{-1}\mathbf{X}^\top \mathbf{y}
-      \]</p>
-      <p>Also can be solved by minibatch SGD:</p>
-      <p>\[
-      (\mathbf{w}, b) \leftarrow (\mathbf{w}, b) - 
-      \frac{\eta}{|\mathcal{B}|} \sum_{i \in \mathcal{B}_t} 
-      \partial_{(\mathbf{w},b)} l^{(i)}(\mathbf{w}, b).
-      \]</p>
-    </div>
-  </div>
+  <p>
+    Instead, we describe probabilities over an <i>interval</i>:
+  </p>
+  <p>\[ P(x_1 \leq X \leq x_2). \]</p>
 
-  <script>
-    function toggleContent(el) {
-      const content = el.nextElementSibling;
-      content.style.display = content.style.display === "block" ? "none" : "block";
-    }
-  </script>
+  <p>
+    To compute such probabilities, we introduce the 
+    <b>Probability Density Function (pdf)</b> \(f(x)\), which satisfies:
+  </p>
+
+  <ol>
+    <li>
+      For any interval \([x_1, x_2]\),
+      \[
+      P(x_1 \leq X \leq x_2) = \int_{x_1}^{x_2} f(x)\,dx.
+      \]
+    </li>
+    <li>
+      For all \(x\), \(f(x) \geq 0\), and
+      \[
+      \int_{-\infty}^{\infty} f(x)\,dx = 1.
+      \]
+    </li>
+  </ol>
+
+  <p>
+    In other words, the probability of \(X\) falling within an interval is given by the 
+    <b><i>area under the curve</i></b> of \(f(x)\) across that interval.
+  </p>
+
+  <p>
+    Since \(f(x) \geq 0\) everywhere, this interpretation is consistent:  
+    if \(f(x)\) is small → the area (and probability) is small;  
+    if \(f(x)\) is large → the area is larger.
+  </p>
+
+  <p>
+    Now, suppose we observe \(n\) independent samples 
+    \(x_1, x_2, \dots, x_n\) from the same distribution with pdf \(f(x)\).  
+    The joint probability density of these samples is:
+  </p>
+
+  <p>\[
+  P(X_1 = x_1, \dots, X_n = x_n) \propto \prod_{i=1}^n f(x_i).
+  \]</p>
+
+  <p>
+    This product is called the <b>Likelihood Function</b>, and it plays a central role in parameter estimation:
+  </p>
+  <p>\[
+  L(\theta) = \prod_{i=1}^n f(x_i \mid \theta),
+  \]</p>
+  <p>
+    where \(\theta\) denotes the parameter(s) of the pdf \(f\).
+  </p>
+
+  <h2>The meaning of Likelihood Function</h2>
+  <p>(Nội dung ở đây bạn có thể bổ sung…)</p>
+
+  <h2>The meaning of Maximum Likelihood Estimation</h2>
+  <p>(Nội dung ở đây bạn có thể bổ sung…)</p>
 
 </body>
 </html>
