@@ -2,105 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Likelihood Notes</title>
-  <!-- MathJax để hiển thị công thức LaTeX -->
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <title>My Notes</title>
   <style>
     body {
-      max-width: 800px;
-      margin: auto;
-      font-family: Georgia, serif;
-      line-height: 1.6;
+      font-family: Arial, sans-serif;
       padding: 20px;
     }
-    h1, h2 {
+    h1 {
       color: #2c3e50;
     }
-    ul, ol {
-      margin-left: 20px;
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin: 10px 0;
+    }
+    a {
+      text-decoration: none;
+      color: #2980b9;
+      font-size: 18px;
+    }
+    a:hover {
+      color: #e74c3c;
     }
   </style>
 </head>
 <body>
-
-  <h1>What is Likelihood?</h1>
-
-  <h2>Continuous Variables</h2>
-
-  <p>
-    For a <b>discrete random variable</b>, we can represent the probability of 
-    \(X\) taking a specific value \(x\) as:
-  </p>
-  <p>\[ P(X = x), \]</p>
-  <p>which can take any value in \([0,1]\).</p>
-
-  <p>
-    However, for a <b>continuous random variable</b>, the probability that 
-    \(X\) equals exactly one point is essentially zero:
-  </p>
-  <p>\[ P(X = x) = 0. \]</p>
-
-  <p>
-    Instead, we describe probabilities over an <i>interval</i>:
-  </p>
-  <p>\[ P(x_1 \leq X \leq x_2). \]</p>
-
-  <p>
-    To compute such probabilities, we introduce the 
-    <b>Probability Density Function (pdf)</b> \(f(x)\), which satisfies:
-  </p>
-
-  <ol>
-    <li>
-      For any interval \([x_1, x_2]\),
-      \[
-      P(x_1 \leq X \leq x_2) = \int_{x_1}^{x_2} f(x)\,dx.
-      \]
-    </li>
-    <li>
-      For all \(x\), \(f(x) \geq 0\), and
-      \[
-      \int_{-\infty}^{\infty} f(x)\,dx = 1.
-      \]
-    </li>
-  </ol>
-
-  <p>
-    In other words, the probability of \(X\) falling within an interval is given by the 
-    <b><i>area under the curve</i></b> of \(f(x)\) across that interval.
-  </p>
-
-  <p>
-    Since \(f(x) \geq 0\) everywhere, this interpretation is consistent:  
-    if \(f(x)\) is small → the area (and probability) is small;  
-    if \(f(x)\) is large → the area is larger.
-  </p>
-
-  <p>
-    Now, suppose we observe \(n\) independent samples 
-    \(x_1, x_2, \dots, x_n\) from the same distribution with pdf \(f(x)\).  
-    The joint probability density of these samples is:
-  </p>
-
-  <p>\[
-  P(X_1 = x_1, \dots, X_n = x_n) \propto \prod_{i=1}^n f(x_i).
-  \]</p>
-
-  <p>
-    This product is called the <b>Likelihood Function</b>, and it plays a central role in parameter estimation:
-  </p>
-  <p>\[
-  L(\theta) = \prod_{i=1}^n f(x_i \mid \theta),
-  \]</p>
-  <p>
-    where \(\theta\) denotes the parameter(s) of the pdf \(f\).
-  </p>
-
-  <h2>The meaning of Likelihood Function</h2>
-  <p>(Nội dung ở đây bạn có thể bổ sung…)</p>
-
-  <h2>The meaning of Maximum Likelihood Estimation</h2>
-  <p>(Nội dung ở đây bạn có thể bổ sung…)</p>
-
+  <h1>📚 My Notes</h1>
+  <p>Chọn một mục để xem chi tiết:</p>
+  <ul>
+    <li><a href="likelihood.html">What is Likelihood?</a></li>
+    <li><a href="mle.html">Maximum Likelihood Estimation</a></li>
+  </ul>
 </body>
 </html>
