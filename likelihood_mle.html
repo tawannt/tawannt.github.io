@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Likelihood + MLE</title>
 
-  <!-- Font giống Chip Huyen (serif) -->
   <link href="https://fonts.googleapis.com/css2?family=Merriweather&display=swap" rel="stylesheet">
 
   <!-- MathJax để hiển thị công thức LaTeX -->
@@ -17,20 +16,20 @@
   <style>
     body {
       font-family: 'Merriweather', serif;
-      background-color: #121212;  /* nền đen */
-      color: #f0f0f0;             /* chữ trắng nhạt */
-      line-height: 1.6;
+      background-color: #ffffff;   /* nền trắng */
+      color: #222222;              /* chữ đen xám */
+      line-height: 1.7;
       max-width: 900px;
       margin: auto;
       padding: 2rem;
     }
 
     h1, h2, h3 {
-      color: #ffffff;
+      color: #111111;
     }
 
     a {
-      color: #80bfff;
+      color: #0066cc;
       text-decoration: none;
     }
     a:hover {
@@ -38,9 +37,9 @@
     }
 
     .math-block {
-      background: #1e1e1e;
+      background: #f9f9f9;
       padding: 10px;
-      border-radius: 8px;
+      border-radius: 6px;
       overflow-x: auto;
     }
   </style>
@@ -48,12 +47,12 @@
 <body>
 
   <a href="index.html">← Back to Home</a>
-  <h1>What is Likelihood?</h1>
+  <h1>Likelihood & Maximum Likelihood Estimation (MLE)</h1>
 
   <h2>Continuous Variables</h2>
 
   <p>
-    For a <b>discrete random variable</b>, the probability of \(X\) taking a specific value \(x\) is
+    For a <b>discrete random variable</b>, the probability of \(X\) taking a specific value \(x\) is:
   </p>
 
   <div class="math-block">
@@ -63,7 +62,7 @@
   </div>
 
   <p>
-    For a <b>continuous random variable</b>, the probability that \(X\) equals exactly one value is
+    For a <b>continuous random variable</b>, the probability that \(X\) equals exactly one value is:
   </p>
 
   <div class="math-block">
@@ -123,6 +122,27 @@
   <div class="math-block">
     \[
     L(\theta) = \prod_{i=1}^n f(x_i \mid \theta)
+    \]
+  </div>
+
+  <h2>Maximum Likelihood Estimation (MLE)</h2>
+  <p>
+    The idea of MLE is to find the parameter \(\theta\) that maximizes the likelihood function:
+  </p>
+
+  <div class="math-block">
+    \[
+    \hat{\theta}_{MLE} = \arg\max_{\theta} L(\theta)
+    \]
+  </div>
+
+  <p>
+    Often, it’s easier to maximize the <b>log-likelihood</b>:
+  </p>
+
+  <div class="math-block">
+    \[
+    \ell(\theta) = \log L(\theta) = \sum_{i=1}^n \log f(x_i \mid \theta)
     \]
   </div>
 
