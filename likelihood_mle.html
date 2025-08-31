@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Likelihood + MLE</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    body {
+      font-family: Georgia, serif;
+      line-height: 1.6;
+      margin: 40px;
+      max-width: 900px;
+    }
+    nav {
+      margin-bottom: 20px;
+    }
+    nav a {
+      text-decoration: none;
+      color: blue;
+      margin-right: 15px;
+    }
+    nav a:hover {
+      color: red;
+    }
+    h1, h2, h3 {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Likelihood + MLE</h1>
+  <nav>
+    <a href="index.html">⬅ Back to Home</a>
+  </nav>
+
+  <!-- What is Likelihood -->
+  <h2>What is Likelihood?</h2>
+
+  <h3>Continuous Variables</h3>
+  <p>
+    For a <b>discrete random variable</b>, we can represent the probability of \(X\) 
+    taking a specific value \(x\) as:
+    \[
+    P(X = x),
+    \]
+    which can take any value in \([0,1]\).
+  </p>
+
+  <p>
+    However, for a <b>continuous random variable</b>, the probability that \(X\) 
+    equals exactly one point is essentially zero:
+    \[
+    P(X = x) = 0.
+    \]
+    Instead, we describe probabilities over an <i>interval</i>:
+    \[
+    P(x_1 \leq X \leq x_2).
+    \]
+  </p>
+
+  <p>
+    To compute such probabilities, we introduce the <b>Probability Density Function (pdf)</b> \(f(x)\), 
+    which satisfies:
+  </p>
+
+  <ol>
+    <li>
+      For any interval \([x_1, x_2]\):
+      \[
+      P(x_1 \leq X \leq x_2) = \int_{x_1}^{x_2} f(x)\,dx.
+      \]
+    </li>
+    <li>
+      For all \(x\), \(f(x) \geq 0\), and
+      \[
+      \int_{-\infty}^{\infty} f(x)\,dx = 1.
+      \]
+    </li>
+  </ol>
+
+  <p>
+    In other words, the probability of \(X\) falling within an interval is the 
+    <b><i>area under the curve</i></b> of \(f(x)\) across that interval.
+  </p>
+
+  <p>
+    Since \(f(x) \geq 0\), this interpretation is always consistent:  
+    small \(f(x)\) → small probability;  
+    large \(f(x)\) → large probability.
+  </p>
+
+  <p>
+    Now, suppose we observe \(n\) independent samples 
+    \(x_1, x_2, \dots, x_n\) from the same distribution with pdf \(f(x)\).  
+    The joint probability density of these samples is:
+    \[
+    P(X_1 = x_1, \dots, X_n = x_n) \propto \prod_{i=1}^n f(x_i).
+    \]
+  </p>
+
+  <p>
+    This product is called the <b>Likelihood Function</b>, central to parameter estimation:
+    \[
+    L(\theta) = \prod_{i=1}^n f(x_i \mid \theta),
+    \]
+    where \(\theta\) denotes the parameter(s) of the pdf \(f\).
+  </p>
+
+  <!-- Placeholder for meaning -->
+  <h3>The meaning of Likelihood Function</h3>
+  <p>
+    (Nội dung sẽ viết thêm giải thích tại đây...)
+  </p>
+
+  <h3>The meaning of Maximum Likelihood Estimation</h3>
+  <p>
+    (Nội dung sẽ viết thêm giải thích tại đây...)
+  </p>
+
+</body>
+</html>
