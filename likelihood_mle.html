@@ -149,7 +149,7 @@
     /* ── Layout ────────────────────────────────────── */
     .page-wrap {
       display: grid;
-      grid-template-columns: 200px 1fr;
+      grid-template-columns: 220px 1fr;
       max-width: 1100px;
       margin: 0 auto;
     }
@@ -159,10 +159,10 @@
       position: sticky;
       top: 56px;
       align-self: start;
-      padding: 2rem 1.5rem 2rem 0;
+      padding: 2rem 1.5rem 2rem 1.2rem;
       border-right: 1px solid var(--border);
       font-size: 0.82rem;
-      height: calc(100vh - 56px);
+      max-height: calc(100vh - 56px);
       overflow-y: auto;
     }
 
@@ -173,6 +173,7 @@
       text-transform: uppercase;
       color: var(--muted);
       margin-bottom: 0.8rem;
+      white-space: nowrap;
     }
 
     .toc ol {
