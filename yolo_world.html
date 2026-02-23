@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO-World: Real-Time Open-Vocabulary Detection</title>
+    <meta name="description"
+        content="A deep-dive into YOLO-World — a real-time, open-vocabulary object detection model bridging speed and flexibility for edge AI applications.">
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- MathJax -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]'], ['$$', '$$']] },
+            options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* ── Reset & tokens ────────────────────────────────── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0d0f14;
+            --surface: #161b24;
+            --surface2: #1e2533;
+            --border: rgba(255, 255, 255, 0.07);
+            --accent: #4f9eff;
+            --accent2: #a78bfa;
+            --accent3: #34d399;
+            --text: #e2e8f0;
+            --muted: #8892a4;
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.75;
+            font-size: 16px;
+        }
+
+        /* ── Hero ────────────────────────────────────────── */
+        .hero {
+            background: linear-gradient(135deg, #0d0f14 0%, #111827 40%, #0f1a2e 70%, #0d0f14 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 5rem 2rem 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% -10%, rgba(79, 158, 255, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 80% 80%, rgba(167, 139, 250, 0.10) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(79, 158, 255, 0.12);
+            border: 1px solid rgba(79, 158, 255, 0.3);
+            color: var(--accent);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 4px 14px;
+            border-radius: 100px;
+            margin-bottom: 1.4rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.4rem);
+            font-weight: 800;
+            line-height: 1.15;
+            background: linear-gradient(135deg, #fff 30%, var(--accent) 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .hero-sub {
+            font-size: 1.1rem;
+            color: var(--muted);
+            max-width: 680px;
+            margin: 0 auto 2rem;
+        }
+
+        .hero-meta {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        .hero-meta span {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 4px 14px;
+        }
+
+        /* ── Layout ──────────────────────────────────────── */
+        .page-wrap {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 0;
+        }
+
+        /* ── Sidebar TOC ─────────────────────────────────── */
+        .toc {
+            position: sticky;
+            top: 1.5rem;
+            align-self: start;
+            padding: 2rem 1.5rem 2rem 0;
+            border-right: 1px solid var(--border);
+            font-size: 0.83rem;
+            height: calc(100vh - 3rem);
+            overflow-y: auto;
+        }
+
+        .toc-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+
+        .toc ol {
+            list-style: none;
+        }
+
+        .toc>ol>li {
+            margin-bottom: 0.5rem;
+        }
+
+        .toc>ol>li>a {
+            font-weight: 600;
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .toc>ol>li>a:hover {
+            color: var(--accent);
+        }
+
+        .toc ol ol {
+            padding-left: 1rem;
+            margin-top: 0.3rem;
+        }
+
+        .toc ol ol li {
+            margin-bottom: 0.25rem;
+        }
+
+        .toc ol ol a {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .toc ol ol a:hover {
+            color: var(--text);
+        }
+
+        /* ── Main content ────────────────────────────────── */
+        main {
+            padding: 3rem 2.5rem 5rem;
+            min-width: 0;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--muted);
+            text-decoration: none;
+            margin-bottom: 2.5rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        /* ── Section headings ────────────────────────────── */
+        section {
+            margin-bottom: 4rem;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.3rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid;
+            border-image: linear-gradient(90deg, var(--accent), transparent) 1;
+        }
+
+        h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 1.8rem 0 0.7rem;
+        }
+
+        h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent2);
+            margin: 1.2rem 0 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        em {
+            color: #c4b5fd;
+            font-style: italic;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Cards ───────────────────────────────────────── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem 1.8rem;
+            margin: 1.2rem 0;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin: 1.2rem 0;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.4rem 1.6rem;
+            transition: border-color 0.25s, transform 0.25s;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(79, 158, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .feature-icon {
+            font-size: 1.6rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .feature-card h4 {
+            margin: 0 0 0.5rem;
+            font-size: 0.95rem;
+            color: #fff;
+        }
+
+        .feature-card p {
+            font-size: 0.87rem;
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.55;
+        }
+
+        /* ── Badges / tags ───────────────────────────────── */
+        .tag {
+            display: inline-block;
+            font-size: 0.74rem;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 100px;
+            margin: 2px;
+        }
+
+        .tag-blue {
+            background: rgba(79, 158, 255, 0.15);
+            color: var(--accent);
+        }
+
+        .tag-purple {
+            background: rgba(167, 139, 250, 0.15);
+            color: var(--accent2);
+        }
+
+        .tag-green {
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--accent3);
+        }
+
+        .tag-red {
+            background: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+        }
+
+        /* ── Pros / Cons / Potential ─────────────────────── */
+        .pcp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 1.2rem 0;
+        }
+
+        .pcp-card {
+            border-radius: var(--radius);
+            padding: 1.3rem 1.5rem;
+        }
+
+        .pcp-card.pros {
+            background: rgba(52, 211, 153, 0.07);
+            border: 1px solid rgba(52, 211, 153, 0.25);
+        }
+
+        .pcp-card.cons {
+            background: rgba(248, 113, 113, 0.07);
+            border: 1px solid rgba(248, 113, 113, 0.25);
+        }
+
+        .pcp-card.potential {
+            background: rgba(167, 139, 250, 0.07);
+            border: 1px solid rgba(167, 139, 250, 0.25);
+        }
+
+        .pcp-card h4 {
+            margin: 0 0 0.8rem;
+            font-size: 1rem;
+        }
+
+        .pcp-card.pros h4 {
+            color: var(--accent3);
+        }
+
+        .pcp-card.cons h4 {
+            color: #f87171;
+        }
+
+        .pcp-card.potential h4 {
+            color: var(--accent2);
+        }
+
+        .pcp-card ul {
+            padding-left: 1.2rem;
+        }
+
+        .pcp-card li {
+            font-size: 0.87rem;
+            color: var(--muted);
+            margin-bottom: 0.4rem;
+            line-height: 1.5;
+        }
+
+        .pcp-card li strong {
+            color: var(--text);
+        }
+
+        /* ── Timeline ────────────────────────────────────── */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 4px;
+            bottom: 4px;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent), var(--accent2), var(--accent3));
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.7rem;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--bg);
+        }
+
+        .timeline-item:nth-child(2)::before {
+            background: var(--accent2);
+        }
+
+        .timeline-item:nth-child(3)::before {
+            background: var(--accent3);
+        }
+
+        .timeline-item h4 {
+            margin: 0 0 0.3rem;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .timeline-item p {
+            font-size: 0.87rem;
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* ── Comparison table ────────────────────────────── */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 1.2rem 0;
+            border-radius: var(--radius);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        thead tr {
+            background: linear-gradient(90deg, rgba(79, 158, 255, 0.15), rgba(167, 139, 250, 0.15));
+        }
+
+        th {
+            padding: 0.9rem 1.1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #fff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 0.8rem 1.1rem;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        td strong {
+            color: var(--text);
+        }
+
+        /* ── Math block ──────────────────────────────────── */
+        .math-block {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent2);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.4rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ── Pipeline steps ──────────────────────────────── */
+        .pipeline {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0;
+            margin: 1.2rem 0;
+            align-items: stretch;
+        }
+
+        .pipe-step {
+            flex: 1;
+            min-width: 140px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.1rem 1rem;
+            position: relative;
+            text-align: center;
+        }
+
+        .pipe-step:first-child {
+            border-radius: var(--radius) 0 0 var(--radius);
+        }
+
+        .pipe-step:last-child {
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+
+        .pipe-step:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            right: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            font-size: 1rem;
+            z-index: 1;
+        }
+
+        .pipe-step .pipe-icon {
+            font-size: 1.4rem;
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+
+        .pipe-step .pipe-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #fff;
+            display: block;
+        }
+
+        .pipe-step .pipe-desc {
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-top: 0.2rem;
+            display: block;
+        }
+
+        /* ── Callout ─────────────────────────────────────── */
+        .callout {
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.3rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            display: flex;
+            gap: 0.7rem;
+            align-items: flex-start;
+        }
+
+        .callout.info {
+            background: rgba(79, 158, 255, 0.08);
+            border-left: 3px solid var(--accent);
+        }
+
+        .callout.warning {
+            background: rgba(251, 191, 36, 0.08);
+            border-left: 3px solid #fbbf24;
+        }
+
+        .callout .callout-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .callout p {
+            margin: 0;
+        }
+
+        /* ── Appendix accordion ──────────────────────────── */
+        details {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 1rem 1.4rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #fff;
+            user-select: none;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::before {
+            content: '▶';
+            font-size: 0.65rem;
+            color: var(--accent);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        details[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        .details-body {
+            padding: 0 1.4rem 1.4rem;
+        }
+
+        /* ── Section label pill ──────────────────────────── */
+        .section-number {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.4rem;
+        }
+
+        /* ── Divider ─────────────────────────────────────── */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        /* ── Figures ─────────────────────────────────────── */
+        .fig-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.4rem 0;
+        }
+
+        .fig-row.single {
+            grid-template-columns: 1fr;
+            max-width: 680px;
+        }
+
+        .fig-row.single-sm {
+            grid-template-columns: 1fr;
+            max-width: 420px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        figure {
+            margin: 0;
+            text-align: center;
+        }
+
+        figure img {
+            width: 100%;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            display: block;
+        }
+
+        figcaption {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            .fig-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── Responsive ──────────────────────────────────── */
+        @media (max-width: 900px) {
+            .page-wrap {
+                grid-template-columns: 1fr;
+            }
+
+            .toc {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 2rem 1.2rem 4rem;
+            }
+
+            .pipeline {
+                flex-direction: column;
+            }
+
+            .pipe-step {
+                border-radius: 0;
+                border-bottom: none;
+            }
+
+            .pipe-step:first-child {
+                border-radius: var(--radius) var(--radius) 0 0;
+            }
+
+            .pipe-step:last-child {
+                border-radius: 0 0 var(--radius) var(--radius);
+                border-bottom: 1px solid var(--border);
+            }
+
+            .pipe-step:not(:last-child)::after {
+                content: '↓';
+                right: 50%;
+                top: auto;
+                bottom: -14px;
+                transform: translateX(50%);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── Hero ─────────────────────────────────────────────── -->
+    <header class="hero">
+        <div class="hero-badge">Technical Report</div>
+        <h1>YOLO-World<br>Open-Vocabulary Object Detection</h1>
+        <p class="hero-sub">
+            Bridging the gap between real-time YOLO speed and open-vocabulary flexibility — enabling zero-shot detection
+            of arbitrary objects on edge devices.
+        </p>
+        <div class="hero-meta">
+            <span>Tencent AI Lab &amp; ARC Lab (PCG)</span>
+            <span>Huazhong Univ. of Science &amp; Technology</span>
+            <span><a href="https://github.com/AILab-CVC/YOLO-World" target="_blank" rel="noopener">GitHub</a></span>
+            <span><a href="https://docs.ultralytics.com/models/yolo-world/" target="_blank" rel="noopener">Ultralytics
+                    Docs</a></span>
+        </div>
+    </header>
+
+    <!-- ── Body ─────────────────────────────────────────────── -->
+    <div class="page-wrap">
+
+        <!-- Sidebar TOC -->
+        <nav class="toc" aria-label="Table of contents">
+            <p class="toc-title">On this page</p>
+            <ol>
+                <li><a href="#overview">1. Overview</a>
+                    <ol>
+                        <li><a href="#problem">The Problem</a></li>
+                        <li><a href="#devhistory">Development History</a></li>
+                    </ol>
+                </li>
+                <li><a href="#features">2. Key Features</a>
+                    <ol>
+                        <li><a href="#vocabulary">Online/Offline Vocabulary</a></li>
+                        <li><a href="#repvlpan">RepVL-PAN</a></li>
+                        <li><a href="#contrastive">Contrastive Matching</a></li>
+                        <li><a href="#autolabel">Auto-Labeling</a></li>
+                        <li><a href="#reparam">Re-parameterization</a></li>
+                    </ol>
+                </li>
+                <li><a href="#proscons">3. Pros, Cons &amp; Potential</a></li>
+                <li><a href="#similar">4. Similar Solutions</a></li>
+                <li><a href="#appendix">Appendix</a>
+                    <ol>
+                        <li><a href="#app-comparison">Comparison</a></li>
+                        <li><a href="#app-architecture">Architecture</a></li>
+                        <li><a href="#app-demo">Demo</a></li>
+                    </ol>
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Main -->
+        <main>
+            <a href="index.html" class="back-link">← Back to My Notes</a>
+
+            <!-- ════════════════════════════════════════════════════
+         SECTION 1 – OVERVIEW
+    ═════════════════════════════════════════════════════ -->
+            <section id="overview">
+                <div class="section-number">Section 1</div>
+                <h2>Overview of YOLO-World</h2>
+
+                <!-- 1.1 Problem -->
+                <h3 id="problem">Which problem is this solution addressing?</h3>
+                <p>
+                    YOLO-World tackles the fundamental trade-off between <strong>speed</strong> and
+                    <strong>vocabulary</strong> in object detection.
+                    Traditional detectors are <em>fast</em> but limited to <em>fixed categories</em>, while existing
+                    open-vocabulary models are
+                    <em>versatile</em> but <em>computationally heavy</em>. YOLO-World bridges this gap, enabling
+                    real-time, zero-shot detection
+                    of arbitrary objects suitable for <strong>edge devices</strong>.
+                </p>
+
+                <div class="card-grid">
+                    <div class="feature-card">
+                        <h4>Real-Time Speed</h4>
+                        <p>Lightweight YOLO backbone keeps inference fast enough for edge devices and video streams.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Open Vocabulary</h4>
+                        <p>Detect arbitrary object categories using natural-language prompts — no retraining needed.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Zero-Shot Generalization</h4>
+                        <p>Strong performance on unseen classes via vision-language contrastive learning.</p>
+                    </div>
+                </div>
+
+                <h3>Developers &amp; Potential Users</h3>
+                <p>
+                    <strong>Developed by:</strong> researchers from <strong>Tencent AI Lab</strong>, ARC Lab (Tencent
+                    PCG), and
+                    <strong>Huazhong University of Science &amp; Technology</strong>.
+                </p>
+                <p>
+                    <strong>Potential users:</strong> developers and engineers in <em>robotics</em> and <em>autonomous
+                        vehicles</em>
+                    who need real-time image understanding on edge devices, with high speed and low computational cost.
+                </p>
+                <p>
+                    <strong>Demo:</strong> Online detection via
+                    <a href="https://github.com/AILab-CVC/YOLO-World" target="_blank" rel="noopener">Roboflow</a>
+                    (<em>prompt-then-detect</em>). Source on
+                    <a href="https://github.com/AILab-CVC/YOLO-World" target="_blank" rel="noopener">GitHub</a>; models
+                    &amp; guides on
+                    <a href="https://docs.ultralytics.com/models/yolo-world/#launch-training-from-scratch"
+                        target="_blank" rel="noopener">Ultralytics</a>.
+                </p>
+
+                <!-- Demo images: Roboflow + Ultralytics -->
+                <div class="fig-row">
+                    <figure>
+                        <img src="img/Roboflow.png" alt="Online Detection with Roboflow" loading="lazy">
+                        <figcaption>Online Detection with Roboflow</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="img/ultralytics.png" alt="Detection with Ultralytics" loading="lazy">
+                        <figcaption>Detection with Ultralytics</figcaption>
+                    </figure>
+                </div>
+
+                <!-- 1.2 Development History -->
+                <h3 id="devhistory">A Brief Development History</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h4>Traditional Object Detection</h4>
+                        <p>
+                            Detectors trained on <em>closed-set</em> datasets with fixed categories — COCO's 80 classes,
+                            Objects365's 365 classes.
+                            Methods: Faster R-CNN (region-based), one-stage detectors (pixel-based), DETR (query-based),
+                            YOLOv8 (speed+accuracy).
+                            <span class="tag tag-red">Limited to trained categories</span>
+                        </p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>Open-Vocabulary Detection (Heavy)</h4>
+                        <p>
+                            Vision-language pre-training to match image regions with text. Unifies detection and
+                            grounding data.
+                            <strong>GLIP</strong> (grounded pre-training), <a href="https://arxiv.org/abs/2303.05499"
+                                target="_blank" rel="noopener">Grounding DINO</a>
+                            (cross-modality fusion), <strong>OWL-ViT</strong>, <strong>ViLD</strong>,
+                            <strong>F-VLM</strong>.
+                            <span class="tag tag-red">Slow—heavy Swin/Transformer backbones</span>
+                        </p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>YOLO-based Open-Vocabulary</h4>
+                        <p>
+                            Brings open-vocabulary capabilities to the efficient YOLO architecture.
+                            <strong>ZSD-YOLO</strong> aligned YOLO with language models but had limited generalization.
+                            YOLO-World overcomes these with RepVL-PAN and contrastive matching.
+                            <span class="tag tag-green">Fast + Flexible</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="fig-row single">
+                    <figure>
+                        <img src="img/brief_development.png" alt="Brief Development of Detection Methods"
+                            loading="lazy">
+                        <figcaption>Fig. Brief Development of Detection Methods</figcaption>
+                    </figure>
+                </div>
+
+                <div class="table-wrap" id="dev-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Phase</th>
+                                <th>Key Characteristics</th>
+                                <th>Representative Methods</th>
+                                <th>Limitations</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Traditional</strong></td>
+                                <td>Closed-set, fixed vocabulary training on COCO (80) / Objects365 (365)</td>
+                                <td>Faster R-CNN, one-stage, DETR, YOLOv8</td>
+                                <td>Cannot handle novel objects or open scenarios</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Heavy OVD</strong></td>
+                                <td>Vision-language pre-training; unifies detection + grounding data</td>
+                                <td>GLIP, Grounding DINO, OWL-ViT, F-VLM</td>
+                                <td>High compute cost; slow inference due to heavy backbones</td>
+                            </tr>
+                            <tr>
+                                <td><strong>YOLO-OVD</strong></td>
+                                <td>Open-vocabulary on efficient YOLO backbone via prompt-then-detect</td>
+                                <td>ZSD-YOLO, <strong>YOLO-World</strong></td>
+                                <td>Early attempts had limited generalization; YOLO-World resolves this</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- ════════════════════════════════════════════════════
+         SECTION 2 – KEY FEATURES
+    ═════════════════════════════════════════════════════ -->
+            <section id="features">
+                <div class="section-number">Section 2</div>
+                <h2>Key Features of the Solution</h2>
+
+                <!-- 2.1 Vocabulary -->
+                <h3 id="vocabulary">Online Vocabulary Training &amp; Offline Vocabulary Inference</h3>
+                <div class="card">
+                    <h4>Training with Online Vocabulary</h4>
+                    <p>
+                        During training, the system builds a temporary vocabulary using a group of four images
+                        (<strong>mosaic sample</strong>).
+                        This list includes correct nouns from the images plus random incorrect nouns — up to <strong>80
+                            words</strong> by default —
+                        helping the model learn via contrastive discrimination.
+                    </p>
+                    <h4>Inference with Offline Vocabulary (Prompt-then-Detect)</h4>
+                    <p>
+                        At inference time, the system uses a <em>pre-set offline vocabulary</em> to save processing
+                        time.
+                        Users define their own categories, which are encoded <em>once</em> into numerical embeddings and
+                        cached — avoiding real-time
+                        text processing on every frame.
+                    </p>
+                </div>
+
+                <div class="fig-row single-sm">
+                    <figure>
+                        <img src="img/mosaic.png" alt="Mosaic sample for online vocabulary training" loading="lazy">
+                        <figcaption>Fig. Mosaic sample used for online vocabulary training</figcaption>
+                    </figure>
+                </div>
+
+                <!-- 2.2 RepVL-PAN -->
+                <h3 id="repvlpan">Vision-Language Interaction via RepVL-PAN</h3>
+                <p>
+                    The core innovation: <strong>Re-parameterizable Vision-Language Path Aggregation Network
+                        (RepVL-PAN)</strong>.
+                    It connects visual features from the image with word embeddings from the text encoder via a
+                    <em>bi-directional</em> mechanism:
+                </p>
+                <div class="card-grid">
+                    <div class="feature-card">
+                        <h4>Text-guided CSPLayer (Text → Image)</h4>
+                        <p>Uses <strong>Max-Sigmoid Attention</strong> to inject text semantics into image features,
+                            highlighting relevant visual regions.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Image-Pooling Attention (Image → Text)</h4>
+                        <p>Aggregates image features via max pooling to update text embeddings, creating
+                            <strong>image-aware embeddings</strong>.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 2.3 Contrastive Matching -->
+                <h3 id="contrastive">Region-Text Contrastive Matching</h3>
+                <p>
+                    Instead of classifying into fixed buckets, YOLO-World recognizes objects by comparing their
+                    <em>visual signature</em>
+                    against <em>text signatures</em> using cosine similarity:
+                </p>
+                <div class="math-block">
+                    \[
+                    s_{k,j} = \alpha \cdot \mathrm{L2\text{-}Norm}(e_k) \cdot \mathrm{L2\text{-}Norm}(w_j)^\top + \beta
+                    \]
+                </div>
+                <p style="font-size:0.88rem; color:var(--muted);">
+                    where \(e_k\) is the predicted object embedding for region \(k\), \(w_j\) is the text embedding for
+                    category \(j\),
+                    and \(\alpha, \beta\) are learnable scale and bias parameters.
+                </p>
+                <div class="callout info">
+                    <p><strong>Region-Text Contrastive Loss:</strong> A cross-entropy loss applied to these similarity
+                        scores trains the model to <em>maximize similarity for matched pairs</em> and minimize it for
+                        unmatched pairs — similar in spirit to CLIP's training objective.</p>
+                </div>
+
+                <!-- 2.4 Auto-labeling -->
+                <h3 id="autolabel">Automated Data Labeling (Auto-Labeling Pipeline)</h3>
+                <p>To recognize patterns <em>outside</em> standard datasets (e.g., beyond COCO), the authors devised a
+                    pipeline to generate training data from massive, noisy image-text pairs:</p>
+
+                <div class="pipeline">
+                    <div class="pipe-step">
+                        <span class="pipe-label">N-gram</span>
+                        <span class="pipe-desc">Extract noun phrases from raw captions</span>
+                    </div>
+                    <div class="pipe-step">
+                        <span class="pipe-label">GLIP</span>
+                        <span class="pipe-desc">Teacher model generates pseudo bounding boxes</span>
+                    </div>
+                    <div class="pipe-step">
+                        <span class="pipe-label">CLIP</span>
+                        <span class="pipe-desc">Verifier scores region–text relevance, filters bad matches</span>
+                    </div>
+                    <div class="pipe-step">
+                        <span class="pipe-label">NMS</span>
+                        <span class="pipe-desc">Removes redundant overlapping bounding boxes</span>
+                    </div>
+                </div>
+
+                <!-- 2.5 Re-parameterization -->
+                <h3 id="reparam">Efficient Inference via Re-parameterization</h3>
+                <p>
+                    Enables real-time detection of custom user-defined objects <em>without retraining</em>.
+                    The offline vocabulary embeddings are reshaped and baked into the weights of <strong>1×1
+                        Convolutional Layers</strong>.
+                    This mathematically transforms the semantic comparison operation into a standard, fast <em>matrix
+                        multiplication</em>
+                    typical of CNNs — removing all text encoder overhead at inference time.
+                </p>
+                <div class="callout warning">
+                    <p>This re-parameterization step is what makes YOLO-World competitive in latency with purely visual
+                        detectors, despite supporting open-vocabulary queries.</p>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- ════════════════════════════════════════════════════
+         SECTION 3 – PROS, CONS, POTENTIAL
+    ═════════════════════════════════════════════════════ -->
+            <section id="proscons">
+                <div class="section-number">Section 3</div>
+                <h2>Pros, Cons &amp; Potential</h2>
+                <div class="pcp-grid">
+                    <div class="pcp-card pros">
+                        <h4>Pros</h4>
+                        <ul>
+                            <li><strong>Real-time efficiency</strong> via prompt-then-detect &amp; offline inference
+                            </li>
+                            <li><strong>Strong zero-shot performance</strong> on unseen classes</li>
+                            <li><strong>Scalable data pipeline</strong> via pseudo-labeling on noisy data</li>
+                            <li><strong>Flexible RepVL-PAN</strong> for multi-scale detection</li>
+                        </ul>
+                    </div>
+                    <div class="pcp-card cons">
+                        <h4>Cons</h4>
+                        <ul>
+                            <li><strong>Pseudo-label quality</strong> caps accuracy (depends on GLIP teacher)</li>
+                            <li><strong>Frozen CLIP encoder</strong> prevents learning linguistic nuances</li>
+                            <li><strong>Pre-defined vocabulary</strong> trade-off: arbitrary detection needs slower
+                                online mode</li>
+                        </ul>
+                    </div>
+                    <div class="pcp-card potential">
+                        <h4>Potential</h4>
+                        <ul>
+                            <li><strong>Robotics &amp; Edge AI</strong>: lightweight design, high frame rates</li>
+                            <li><strong>Real-time video</strong>: outperforms Transformers for streaming tasks</li>
+                            <li><strong>Foundation model distillation</strong>: template for segmentation, etc.</li>
+                            <li><strong>Democratized detection</strong>: accessible via natural-language prompts</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- ════════════════════════════════════════════════════
+         SECTION 4 – SIMILAR SOLUTIONS
+    ═════════════════════════════════════════════════════ -->
+            <section id="similar">
+                <div class="section-number">Section 4</div>
+                <h2>Two Solutions with Similar Functionalities</h2>
+
+                <div class="card" style="margin-bottom:1.2rem;">
+                    <h3 style="margin-top:0;">GLIP — Grounded Language-Image Pre-Training</h3>
+                    <p>
+                        <a href="https://openaccess.thecvf.com/content/CVPR2022/papers/Li_Grounded_Language-Image_Pre-Training_CVPR_2022_paper.pdf"
+                            target="_blank" rel="noopener">GLIP (CVPR 2022)</a>
+                        reformulates detection as <em>phrase grounding</em> by aligning visual regions with massive
+                        image-text pairs,
+                        creating strong zero-shot capabilities.
+                    </p>
+                    <p>
+                        However, it relies on <strong>heavy backbones</strong> (Swin Transformers) and processes image
+                        and text
+                        <em>simultaneously</em> at every inference, causing high computational cost.
+                    </p>
+                    <p>
+                        In YOLO-World, GLIP serves as a precise but slow <em>teacher</em> to generate pseudo-labels
+                        during the auto-labeling pipeline.
+                    </p>
+                    <div>
+                        <span class="tag tag-green">Strong zero-shot</span>
+                        <span class="tag tag-red">Slow inference</span>
+                        <span class="tag tag-purple">Used as teacher in YOLO-World</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-top:0;">Grounding DINO</h3>
+                    <p>
+                        <a href="https://arxiv.org/pdf/2303.05499" target="_blank" rel="noopener">Grounding DINO</a>
+                        merges DINO (Transformer) with GLIP's pre-training, employing extensive cross-modality fusion
+                        for
+                        state-of-the-art open-set accuracy.
+                    </p>
+                    <p>
+                        Despite top accuracy, it suffers from <strong>slow inference</strong> due to online text
+                        processing at every forward pass —
+                        unlike YOLO-World's decoupled <em>prompt-then-detect</em> strategy with cached vocabulary.
+                    </p>
+                    <div>
+                        <span class="tag tag-green">SOTA open-set accuracy</span>
+                        <span class="tag tag-red">Online text processing = slow</span>
+                        <span class="tag tag-blue">Transformer-based</span>
+                    </div>
+                </div>
+
+                <div class="table-wrap" style="margin-top:1.5rem;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Backbone</th>
+                                <th>Text Processing</th>
+                                <th>Speed</th>
+                                <th>Zero-Shot</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>GLIP</strong></td>
+                                <td>Swin-L</td>
+                                <td>Online (per-image)</td>
+                                <td><span class="tag tag-red">Slow</span></td>
+                                <td><span class="tag tag-green">Strong</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Grounding DINO</strong></td>
+                                <td>Swin-L + DINO</td>
+                                <td>Online (per-image)</td>
+                                <td><span class="tag tag-red">Slow</span></td>
+                                <td><span class="tag tag-green">SOTA</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>YOLO-World</strong></td>
+                                <td>YOLOv8 (Darknet)</td>
+                                <td>Offline (cached once)</td>
+                                <td><span class="tag tag-green">Real-time</span></td>
+                                <td><span class="tag tag-blue">Competitive</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- ════════════════════════════════════════════════════
+         APPENDIX
+    ═════════════════════════════════════════════════════ -->
+            <section id="appendix">
+                <div class="section-number">Appendix</div>
+                <h2>Appendix</h2>
+
+                <!-- A1: Comparison -->
+                <details id="app-comparison" open>
+                    <summary>A1 — Comparison Among Detection Methods</summary>
+                    <div class="details-body">
+                        <ul style="padding-left:1.3rem; color:var(--muted); font-size:0.9rem; line-height:1.7;">
+                            <li style="margin-bottom:0.8rem;">
+                                <strong style="color:#fff;">Part a — Traditional Object Detector:</strong>
+                                Relies on a <em>fixed vocabulary</em>; can only identify categories seen during training
+                                (e.g., COCO's 80 classes).
+                                Lacks flexibility for novel objects in open environments.
+                            </li>
+                            <li style="margin-bottom:0.8rem;">
+                                <strong style="color:#fff;">Part b — Previous Open-Vocabulary Detectors:</strong>
+                                Designed for novel objects but use <em>large, heavy models</em>.
+                                Simultaneous image+text processing on every input is time-consuming and hinders
+                                practical deployment.
+                            </li>
+                            <li>
+                                <strong style="color:#fff;">Part c — YOLO-World:</strong>
+                                Lightweight YOLO + <em>prompt-then-detect</em> strategy. Users define prompts encoded
+                                into an <em>offline vocabulary</em>
+                                via Text Encoder, re-parameterized into model weights. Enables rapid open-vocabulary
+                                detection without
+                                repetitive text encoding during inference.
+                            </li>
+                        </ul>
+                    </div>
+                </details>
+
+                <!-- A2: Architecture -->
+                <details id="app-architecture">
+                    <summary>A2 — Architecture Deep-Dive</summary>
+                    <div class="details-body">
+                        <p style="font-size:0.9rem; color:var(--muted);">
+                            The system consists of three primary stages: <strong style="color:#fff;">Feature
+                                Extraction</strong>,
+                            <strong style="color:#fff;">Vision-Language Fusion</strong>, and <strong
+                                style="color:#fff;">Contrastive Detection</strong>.
+                        </p>
+
+                        <div class="fig-row single" style="max-width:100%;">
+                            <figure>
+                                <img src="img/overallArchitecture.png" alt="Overall Architecture" loading="lazy">
+                                <figcaption>Fig. Overall Architecture of YOLO-World</figcaption>
+                            </figure>
+                        </div>
+
+                        <h4>Feature Extraction</h4>
+                        <ul style="padding-left:1.3rem; color:var(--muted); font-size:0.88rem; line-height:1.7;">
+                            <li><strong style="color:#fff;">Vision Stream:</strong> YOLOv8-based Darknet backbone
+                                processes image \(I\) → multi-scale pyramids \(\{C_3, C_4, C_5\}\).</li>
+                            <li><strong style="color:#fff;">Language Stream (Train):</strong> N-gram extracts noun
+                                phrases → encoded by pre-trained CLIP Transformer → embeddings \(W =
+                                \texttt{TextEncoder}(T)\).</li>
+                            <li><strong style="color:#fff;">Language Stream (Infer):</strong> Custom vocabulary encoded
+                                <em>once</em> → offline matrix cached; no real-time text processing.
+                            </li>
+                        </ul>
+
+                        <h4>Vision-Language Fusion (RepVL-PAN)</h4>
+                        <div class="fig-row single-sm">
+                            <figure>
+                                <img src="img/repvlpan.png" alt="RepVL-PAN diagram" loading="lazy">
+                                <figcaption>Fig. RepVL-PAN bi-directional fusion</figcaption>
+                            </figure>
+                        </div>
+                        <ul style="padding-left:1.3rem; color:var(--muted); font-size:0.88rem; line-height:1.7;">
+                            <li><strong style="color:#fff;">Text→Image:</strong> Max-Sigmoid Attention in Text-guided
+                                CSPLayer highlights text-relevant image regions.</li>
+                            <li><strong style="color:#fff;">Image→Text:</strong> Image-Pooling Attention aggregates
+                                image features via max pooling to update text embeddings into image-aware embeddings.
+                            </li>
+                        </ul>
+
+                        <h4>Detection &amp; Contrastive Matching</h4>
+                        <ul style="padding-left:1.3rem; color:var(--muted); font-size:0.88rem; line-height:1.7;">
+                            <li><strong style="color:#fff;">Bounding Box Regression:</strong> 3×3 convolutions predict
+                                boxes \(\{b_k\}\).</li>
+                            <li><strong style="color:#fff;">Text Contrastive Head:</strong> 3×3 convolutions produce
+                                object embedding \(e_k\), matched against image-aware text embeddings \(w_j\) via:</li>
+                        </ul>
+                        <div class="math-block">
+                            \[ s_{k,j} = \alpha \cdot \mathrm{L2\text{-}Norm}(e_k) \cdot
+                            \mathrm{L2\text{-}Norm}(w_j)^\top + \beta \]
+                        </div>
+
+                        <h4>Inference Optimization (Re-parameterization)</h4>
+                        <p style="font-size:0.88rem; color:var(--muted);">
+                            The offline vocabulary matrix is re-parameterized into <strong style="color:#fff;">1×1
+                                convolutional weights</strong>,
+                            transforming vision-language interaction into standard convolutions — eliminating text
+                            encoder overhead entirely during deployment.
+                        </p>
+                    </div>
+                </details>
+
+                <!-- A3: Demo -->
+                <details id="app-demo">
+                    <summary>A3 — Detection Demo Results</summary>
+                    <div class="details-body">
+                        <p style="font-size:0.9rem; color:var(--muted);">
+                            Tested using my own
+                            <a href="https://www.kaggle.com/code/nguyentranthienan/yolo-world-test" target="_blank"
+                                rel="noopener">Kaggle Notebook</a>
+                            with models from <a href="https://docs.ultralytics.com/models/yolo-world/" target="_blank"
+                                rel="noopener">Ultralytics</a>.
+                        </p>
+
+                        <h4>Library Scene (<a href="https://www.pexels.com/photo/people-sitting-in-a-library-9572637/"
+                                target="_blank" rel="noopener">Pexels</a>)</h4>
+                        <div class="fig-row">
+                            <figure>
+                                <img src="img/example2_no_prompt.png" alt="Library — no prompt" loading="lazy">
+                                <figcaption>No prompt — general detection</figcaption>
+                            </figure>
+                            <figure>
+                                <img src="img/example2_prompt.png" alt="Library — with prompt" loading="lazy">
+                                <figcaption>Prompt: "person, desk lamp, laptop, pendant light"</figcaption>
+                            </figure>
+                        </div>
+                        <p style="font-size:0.87rem; color:var(--muted);">Without prompts the model auto-detects many
+                            common objects but may miss specific items. With custom prompts the results are cleaner and
+                            more targeted — but unlisted objects will be ignored.</p>
+
+                        <h4>Bedroom Scene (<a href="https://www.pexels.com/photo/white-bed-cover-near-wall-279746/"
+                                target="_blank" rel="noopener">Pexels</a>)</h4>
+                        <div class="fig-row">
+                            <figure>
+                                <img src="img/example1_no_prompt.png" alt="Bedroom — no prompt" loading="lazy">
+                                <figcaption>No prompt — some incorrect labels</figcaption>
+                            </figure>
+                            <figure>
+                                <img src="img/example1_prompt.png" alt="Bedroom — with prompt" loading="lazy">
+                                <figcaption>Prompt: "bed, night lamp, wall art, chair, mirror"</figcaption>
+                            </figure>
+                        </div>
+                        <p style="font-size:0.87rem; color:var(--muted);">Without prompts the model misdetects some
+                            objects (e.g., lamp, art). Custom prompts guide the model to detect the targeted objects
+                            correctly.</p>
+
+                        <div class="callout info" style="margin-top:1rem;">
+
+                            <p><strong>Key Takeaway:</strong> Prompting trades off generality for precision. Without
+                                prompts, YOLO-World behaves like a standard detector. With prompts, it becomes a
+                                targeted, efficient open-vocabulary detector.</p>
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer
+        style="text-align:center; padding:2rem; border-top:1px solid var(--border); color:var(--muted); font-size:0.82rem;">
+        Report on YOLO-World · <a href="https://arxiv.org/abs/2401.17270" target="_blank" rel="noopener">Original Paper
+            (arXiv:2401.17270)</a>
+    </footer>
+
+</body>
+
+</html>

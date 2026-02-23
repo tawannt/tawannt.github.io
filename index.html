@@ -1,38 +1,475 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <title>My Notes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tawan Nguyen — Notes</title>
+  <meta name="description"
+    content="Personal notes and writeups on machine learning, statistics, and computer vision by Tawan Nguyen.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    h1 {
-      color: #2c3e50;
-    }
-    ul {
-      list-style: none;
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
       padding: 0;
     }
-    li {
-      margin: 10px 0;
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #161b24;
+      --surface2: #1e2533;
+      --border: rgba(255, 255, 255, 0.07);
+      --accent: #4f9eff;
+      --accent2: #a78bfa;
+      --accent3: #34d399;
+      --text: #e2e8f0;
+      --muted: #8892a4;
+      --radius: 12px;
     }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
     a {
+      color: var(--accent);
       text-decoration: none;
-      color: #2980b9;
-      font-size: 18px;
     }
+
     a:hover {
-      color: #e74c3c;
+      text-decoration: underline;
+    }
+
+    /* ── Navbar ─────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 15, 20, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+
+    .nav-logo {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .nav-logo span {
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.85rem;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    /* ── Hero / About ───────────────────────────────────── */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 6rem 2rem 5rem;
+      text-align: center;
+      background: linear-gradient(160deg, #0d0f14 0%, #111827 50%, #0d0f14 100%);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% -5%, rgba(79, 158, 255, 0.16) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 85% 90%, rgba(167, 139, 250, 0.10) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 auto 1.5rem;
+      border: 3px solid rgba(79, 158, 255, 0.3);
+    }
+
+    .hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 40%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.6rem;
+    }
+
+    .hero-role {
+      font-size: 1rem;
+      color: var(--accent2);
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .hero-bio {
+      max-width: 580px;
+      margin: 0 auto 2rem;
+      color: var(--muted);
+      font-size: 0.97rem;
+    }
+
+    .hero-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .hero-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 6px 16px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      transition: border-color 0.2s, color 0.2s;
+      text-decoration: none;
+    }
+
+    .hero-links a:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* ── Main content ───────────────────────────────────── */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 6rem;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+
+    .section-sub {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+
+    /* ── Topics ─────────────────────────────────────────── */
+    .topics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 3rem;
+    }
+
+    .topic-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 5px 14px;
+      border-radius: 100px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    /* ── Note cards ─────────────────────────────────────── */
+    hr.divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2.5rem 0;
+    }
+
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .note-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.6rem 1.8rem;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      transition: border-color 0.25s, transform 0.2s, box-shadow 0.25s;
+    }
+
+    .note-card:hover {
+      border-color: rgba(79, 158, 255, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      text-decoration: none;
+    }
+
+    .note-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.6rem;
+    }
+
+    .note-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.4;
+    }
+
+    .note-arrow {
+      color: var(--muted);
+      font-size: 1rem;
+      flex-shrink: 0;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .note-card:hover .note-arrow {
+      color: var(--accent);
+      transform: translateX(3px);
+    }
+
+    .note-desc {
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .note-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 100px;
+    }
+
+    .tag-blue {
+      background: rgba(79, 158, 255, 0.15);
+      color: #4f9eff;
+    }
+
+    .tag-purple {
+      background: rgba(167, 139, 250, 0.15);
+      color: #a78bfa;
+    }
+
+    .tag-green {
+      background: rgba(52, 211, 153, 0.15);
+      color: #34d399;
+    }
+
+    /* ── Featured card ──────────────────────────────────── */
+    .note-card.featured {
+      border-color: rgba(79, 158, 255, 0.2);
+      background: linear-gradient(135deg, #161b24, #1a2235);
+      grid-column: 1 / -1;
+      flex-direction: row;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .note-card.featured .note-body {
+      flex: 1;
+    }
+
+    .note-card.featured h3 {
+      font-size: 1.15rem;
+    }
+
+    .featured-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(79, 158, 255, 0.1);
+      border: 1px solid rgba(79, 158, 255, 0.25);
+      border-radius: 100px;
+      padding: 2px 10px;
+      margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .notes-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .note-card.featured {
+        flex-direction: column;
+      }
+    }
+
+    /* ── Footer ─────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.82rem;
+      color: var(--muted);
     }
   </style>
 </head>
+
 <body>
-  <h1>My Notes</h1>
-  <p>Choosing one for more detailed:</p>
-  <ul>
-    <li><a href="likelihood_mle.html">What is Likelihood and MLE?</a></li>
-  </ul>
+
+  <!-- Nav -->
+  <nav>
+    <a href="index.html" class="nav-logo">tawannt<span>.github.io</span></a>
+    <div class="nav-links">
+      <a href="#notes">Notes</a>
+      <a href="https://github.com/tawannt" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </nav>
+
+  <!-- Hero / About -->
+  <section class="hero">
+    <div class="hero-avatar">T</div>
+    <h1>Tawan Nguyen</h1>
+    <p class="hero-role">Computer Science Student · Machine Learning Enthusiast</p>
+    <p class="hero-bio">
+      Third-year CS student passionate about machine learning, computer vision, and statistical foundations.
+      This site collects my personal notes and writeups from coursework and self-study.
+    </p>
+    <div class="hero-links">
+      <a href="https://github.com/tawannt" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.kaggle.com/nguyentranthienan" target="_blank" rel="noopener">Kaggle</a>
+      <a href="#notes">View Notes</a>
+    </div>
+  </section>
+
+  <!-- Main -->
+  <main>
+
+    <!-- Topics -->
+    <div class="section-label">Interests</div>
+    <div class="topics">
+      <span class="topic-chip">Computer Vision</span>
+      <span class="topic-chip">Object Detection</span>
+      <span class="topic-chip">Vision-Language Models</span>
+      <span class="topic-chip">Statistics &amp; Probability</span>
+      <span class="topic-chip">Machine Learning</span>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Notes -->
+    <div id="notes">
+      <div class="section-label">Reading &amp; Notes</div>
+      <h2 class="section-title">All Notes</h2>
+      <p class="section-sub">Writeups from courses, papers, and personal projects.</p>
+
+      <div class="notes-grid">
+
+        <!-- Featured: YOLO-World -->
+        <a href="yolo_world.html" class="note-card featured" id="card-yolo-world">
+          <div class="note-body">
+            <div class="featured-badge">Featured</div>
+            <h3>YOLO-World: Real-Time Open-Vocabulary Object Detection</h3>
+            <p class="note-desc">
+              A deep dive into how YOLO-World bridges YOLO's real-time speed with open-vocabulary flexibility —
+              covering RepVL-PAN, region-text contrastive matching, the auto-labeling pipeline,
+              re-parameterization, and demo comparisons.
+            </p>
+            <div class="note-tags" style="margin-top:0.6rem;">
+              <span class="tag tag-blue">Computer Vision</span>
+              <span class="tag tag-purple">Object Detection</span>
+              <span class="tag tag-green">Vision-Language</span>
+            </div>
+          </div>
+          <span class="note-arrow">→</span>
+        </a>
+
+        <!-- Likelihood & MLE -->
+        <a href="likelihood_mle.html" class="note-card" id="card-mle">
+          <div class="note-card-top">
+            <h3>What is Likelihood and MLE?</h3>
+            <span class="note-arrow">→</span>
+          </div>
+          <p class="note-desc">
+            A walkthrough of the probability density function, the likelihood function,
+            and maximum likelihood estimation with derivations.
+          </p>
+          <div class="note-tags">
+            <span class="tag tag-blue">Statistics</span>
+            <span class="tag tag-purple">Probability</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    tawannt.github.io · Built with HTML &amp; CSS
+  </footer>
+
 </body>
+
 </html>
