@@ -161,24 +161,23 @@
       letter-spacing: 0.03em;
     }
 
-    /* ── Layout ────────────────────────────────────── */
+    /* ── Layout ───────────────────────────────────────── */
     .page-wrap {
-      display: flex;
-      max-width: 1100px;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      max-width: 1200px;
       margin: 0 auto;
-      align-items: flex-start;
     }
 
     /* ── TOC ───────────────────────────────────────── */
     .toc {
       position: sticky;
-      top: 3rem;
-      width: 240px;
-      flex-shrink: 0;
-      padding: 2rem 1.5rem 2rem 1.5rem;
+      top: 1.5rem;
+      align-self: start;
+      padding: 2rem 1.5rem 2rem 0;
       border-right: 1px solid var(--border);
-      font-size: 0.82rem;
-      max-height: calc(100vh - 3rem);
+      font-size: 0.83rem;
+      height: calc(100vh - 3rem);
       overflow-y: auto;
     }
 
@@ -188,8 +187,7 @@
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 0.8rem;
-      white-space: nowrap;
+      margin-bottom: 1rem;
     }
 
     .toc ol {
@@ -208,12 +206,31 @@
     }
 
     .toc>ol>li>a:hover {
-      color: var(--accent2);
+      color: var(--accent);
     }
 
-    @media (max-width: 800px) {
+    .toc ol ol {
+      padding-left: 1rem;
+      margin-top: 0.3rem;
+    }
+
+    .toc ol ol li {
+      margin-bottom: 0.25rem;
+    }
+
+    .toc ol ol a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .toc ol ol a:hover {
+      color: var(--text);
+    }
+
+    @media (max-width: 900px) {
       .page-wrap {
-        display: block;
+        grid-template-columns: 1fr;
       }
 
       .toc {
@@ -221,40 +238,41 @@
       }
     }
 
-    /* ── Content ───────────────────────────────────── */
+    /* ── Content ─────────────────────────────────────── */
     main {
       padding: 3rem 2.5rem 5rem;
       min-width: 0;
     }
 
     section {
-      margin-bottom: 3.5rem;
+      margin-bottom: 4rem;
     }
 
-    .section-label {
-      font-size: 0.7rem;
+    .section-number {
+      display: inline-block;
+      font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--accent2);
+      color: var(--accent);
       margin-bottom: 0.4rem;
     }
 
     h2 {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       font-weight: 700;
       color: #fff;
-      padding-bottom: 0.4rem;
+      margin-bottom: 0.3rem;
+      padding-bottom: 0.5rem;
       border-bottom: 2px solid;
-      border-image: linear-gradient(90deg, var(--accent2), transparent) 1;
-      margin-bottom: 1rem;
+      border-image: linear-gradient(90deg, var(--accent), transparent) 1;
     }
 
     h3 {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       font-weight: 600;
-      color: var(--accent2);
-      margin: 1.6rem 0 0.6rem;
+      color: var(--accent);
+      margin: 1.8rem 0 0.7rem;
     }
 
     p {
@@ -339,7 +357,7 @@
   <!-- Nav -->
   <nav>
     <a href="index.html" class="nav-logo">tawannt<span>.github.io</span></a>
-    <a href="index.html" class="back-link">← Back to Home</a>
+    <a href="index.html" class="back-link">← Home</a>
   </nav>
 
   <!-- Hero -->
@@ -356,7 +374,7 @@
   <div class="page-wrap">
 
     <!-- TOC -->
-    <nav class="toc" aria-label="Table of contents">
+    <aside class="toc">
       <p class="toc-title">On this page</p>
       <ol>
         <li><a href="#continuous">Continuous Variables</a></li>
@@ -364,13 +382,15 @@
         <li><a href="#meaning-likelihood">Meaning of Likelihood</a></li>
         <li><a href="#mle">Maximum Likelihood Estimation</a></li>
       </ol>
-    </nav>
+    </aside>
 
     <!-- Main -->
     <main>
+      <a href="index.html" class="back-link"
+        style="display:inline-flex; align-items:center; gap:6px; margin-bottom:2.5rem;">← Back to Home</a>
 
       <section id="continuous">
-        <div class="section-label">Section 1</div>
+        <div class="section-number">Section 1</div>
         <h2>Continuous Variables</h2>
 
         <p>
@@ -419,7 +439,7 @@
       <hr>
 
       <section id="likelihood-fn">
-        <div class="section-label">Section 2</div>
+        <div class="section-number">Section 2</div>
         <h2>The Likelihood Function</h2>
 
         <p>
@@ -448,7 +468,7 @@
       <hr>
 
       <section id="meaning-likelihood">
-        <div class="section-label">Section 3</div>
+        <div class="section-number">Section 3</div>
         <h2>The Meaning of the Likelihood Function</h2>
 
         <p>
@@ -465,7 +485,7 @@
       <hr>
 
       <section id="mle">
-        <div class="section-label">Section 4</div>
+        <div class="section-number">Section 4</div>
         <h2>Maximum Likelihood Estimation</h2>
 
         <p>
