@@ -160,6 +160,23 @@
         }
 
         /* ════════════════════════════════════════════════════
+           DATE BADGE — top-right corner of hero
+           ════════════════════════════════════════════════════ */
+        .hero-date {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--muted);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 3px 12px;
+            letter-spacing: 0.03em;
+        }
+
+        /* ════════════════════════════════════════════════════
            PAGE LAYOUT (sidebar + content)
            ════════════════════════════════════════════════════ */
         .page-wrap {
@@ -822,6 +839,9 @@
          TODO: fill in badge, title, subtitle, meta chips
          ════════════════════════════════════════════════════ -->
     <header class="hero">
+        <!-- TODO: set the note date, e.g. "Feb 2025" -->
+        <div class="hero-date">Month Year</div>
+
         <!-- TODO: e.g. "Technical Report" / "Lecture Note" / "Paper Walkthrough" -->
         <div class="hero-badge">Technical Report</div>
 
@@ -833,10 +853,9 @@
             A short description of what this note covers — one or two sentences.
         </p>
 
-        <!-- TODO: Author, date, links. Remove <span>s you don't need. -->
+        <!-- TODO: Author, institution, links. Remove spans you don't need. -->
         <div class="hero-meta">
             <span>Author / Institution</span>
-            <span>Year</span>
             <span><a href="#">Paper / Source</a></span>
             <span><a href="#">GitHub</a></span>
         </div>

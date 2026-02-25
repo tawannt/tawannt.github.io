@@ -146,6 +146,21 @@
       margin: 0 auto;
     }
 
+    /* Date badge — top-right of hero */
+    .hero-date {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 3px 12px;
+      letter-spacing: 0.03em;
+    }
+
     /* ── Layout ────────────────────────────────────── */
     .page-wrap {
       display: flex;
@@ -329,14 +344,12 @@
 
   <!-- Hero -->
   <header class="hero">
+    <div class="hero-date">03/09/2025</div>
     <div class="hero-badge">Statistics Note</div>
     <h1>What is Likelihood and MLE?</h1>
     <p class="hero-sub">
       From probability density functions to the likelihood function and maximum likelihood estimation.
     </p>
-    <div class="hero-meta">
-      <span>Feb 2025</span>
-    </div>
   </header>
 
   <!-- Body -->
