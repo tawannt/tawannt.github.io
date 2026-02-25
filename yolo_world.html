@@ -113,7 +113,7 @@
         }
 
         /* ── Nav ──────────────────────────────────────── */
-        nav {
+        body>nav {
             position: sticky;
             top: 0;
             z-index: 100;
@@ -832,7 +832,7 @@
     <div class="page-wrap">
 
         <!-- Sidebar TOC -->
-        <nav class="toc" aria-label="Table of contents">
+        <aside class="toc">
             <p class="toc-title">On this page</p>
             <ol>
                 <li><a href="#overview">1. Overview</a>
@@ -860,7 +860,7 @@
                     </ol>
                 </li>
             </ol>
-        </nav>
+        </aside>
 
         <!-- Main -->
         <main>
@@ -888,11 +888,13 @@
                 <div class="card-grid">
                     <div class="feature-card">
                         <h4>Real-Time Speed</h4>
-                        <p>Lightweight YOLO backbone keeps inference fast enough for edge devices and video streams.</p>
+                        <p>Lightweight YOLO backbone keeps inference fast enough for edge devices and video streams.
+                        </p>
                     </div>
                     <div class="feature-card">
                         <h4>Open Vocabulary</h4>
-                        <p>Detect arbitrary object categories using natural-language prompts — no retraining needed.</p>
+                        <p>Detect arbitrary object categories using natural-language prompts — no retraining needed.
+                        </p>
                     </div>
                     <div class="feature-card">
                         <h4>Zero-Shot Generalization</h4>
@@ -902,20 +904,24 @@
 
                 <h3>Developers &amp; Potential Users</h3>
                 <p>
-                    <strong>Developed by:</strong> researchers from <strong>Tencent AI Lab</strong>, ARC Lab (Tencent
+                    <strong>Developed by:</strong> researchers from <strong>Tencent AI Lab</strong>, ARC Lab
+                    (Tencent
                     PCG), and
                     <strong>Huazhong University of Science &amp; Technology</strong>.
                 </p>
                 <p>
-                    <strong>Potential users:</strong> developers and engineers in <em>robotics</em> and <em>autonomous
+                    <strong>Potential users:</strong> developers and engineers in <em>robotics</em> and
+                    <em>autonomous
                         vehicles</em>
-                    who need real-time image understanding on edge devices, with high speed and low computational cost.
+                    who need real-time image understanding on edge devices, with high speed and low computational
+                    cost.
                 </p>
                 <p>
                     <strong>Demo:</strong> Online detection via
                     <a href="https://github.com/AILab-CVC/YOLO-World" target="_blank" rel="noopener">Roboflow</a>
                     (<em>prompt-then-detect</em>). Source on
-                    <a href="https://github.com/AILab-CVC/YOLO-World" target="_blank" rel="noopener">GitHub</a>; models
+                    <a href="https://github.com/AILab-CVC/YOLO-World" target="_blank" rel="noopener">GitHub</a>;
+                    models
                     &amp; guides on
                     <a href="https://docs.ultralytics.com/models/yolo-world/#launch-training-from-scratch"
                         target="_blank" rel="noopener">Ultralytics</a>.
@@ -939,9 +945,11 @@
                     <div class="timeline-item">
                         <h4>Traditional Object Detection</h4>
                         <p>
-                            Detectors trained on <em>closed-set</em> datasets with fixed categories — COCO's 80 classes,
+                            Detectors trained on <em>closed-set</em> datasets with fixed categories — COCO's 80
+                            classes,
                             Objects365's 365 classes.
-                            Methods: Faster R-CNN (region-based), one-stage detectors (pixel-based), DETR (query-based),
+                            Methods: Faster R-CNN (region-based), one-stage detectors (pixel-based), DETR
+                            (query-based),
                             YOLOv8 (speed+accuracy).
                             <span class="tag tag-red">Limited to trained categories</span>
                         </p>
@@ -952,7 +960,8 @@
                             Vision-language pre-training to match image regions with text. Unifies detection and
                             grounding data.
                             <strong>GLIP</strong> (grounded pre-training), <a href="https://arxiv.org/abs/2303.05499"
-                                target="_blank" rel="noopener">Grounding DINO</a>
+                                target="_blank" rel="noopener">Grounding
+                                DINO</a>
                             (cross-modality fusion), <strong>OWL-ViT</strong>, <strong>ViLD</strong>,
                             <strong>F-VLM</strong>.
                             <span class="tag tag-red">Slow—heavy Swin/Transformer backbones</span>
@@ -962,7 +971,8 @@
                         <h4>YOLO-based Open-Vocabulary</h4>
                         <p>
                             Brings open-vocabulary capabilities to the efficient YOLO architecture.
-                            <strong>ZSD-YOLO</strong> aligned YOLO with language models but had limited generalization.
+                            <strong>ZSD-YOLO</strong> aligned YOLO with language models but had limited
+                            generalization.
                             YOLO-World overcomes these with RepVL-PAN and contrastive matching.
                             <span class="tag tag-green">Fast + Flexible</span>
                         </p>
@@ -1027,7 +1037,8 @@
                     <p>
                         During training, the system builds a temporary vocabulary using a group of four images
                         (<strong>mosaic sample</strong>).
-                        This list includes correct nouns from the images plus random incorrect nouns — up to <strong>80
+                        This list includes correct nouns from the images plus random incorrect nouns — up to
+                        <strong>80
                             words</strong> by default —
                         helping the model learn via contrastive discrimination.
                     </p>
@@ -1035,7 +1046,8 @@
                     <p>
                         At inference time, the system uses a <em>pre-set offline vocabulary</em> to save processing
                         time.
-                        Users define their own categories, which are encoded <em>once</em> into numerical embeddings and
+                        Users define their own categories, which are encoded <em>once</em> into numerical embeddings
+                        and
                         cached — avoiding real-time
                         text processing on every frame.
                     </p>
@@ -1080,23 +1092,28 @@
                 </p>
                 <div class="math-block">
                     \[
-                    s_{k,j} = \alpha \cdot \mathrm{L2\text{-}Norm}(e_k) \cdot \mathrm{L2\text{-}Norm}(w_j)^\top + \beta
+                    s_{k,j} = \alpha \cdot \mathrm{L2\text{-}Norm}(e_k) \cdot \mathrm{L2\text{-}Norm}(w_j)^\top +
+                    \beta
                     \]
                 </div>
                 <p style="font-size:0.88rem; color:var(--muted);">
-                    where \(e_k\) is the predicted object embedding for region \(k\), \(w_j\) is the text embedding for
+                    where \(e_k\) is the predicted object embedding for region \(k\), \(w_j\) is the text embedding
+                    for
                     category \(j\),
                     and \(\alpha, \beta\) are learnable scale and bias parameters.
                 </p>
                 <div class="callout info">
-                    <p><strong>Region-Text Contrastive Loss:</strong> A cross-entropy loss applied to these similarity
-                        scores trains the model to <em>maximize similarity for matched pairs</em> and minimize it for
+                    <p><strong>Region-Text Contrastive Loss:</strong> A cross-entropy loss applied to these
+                        similarity
+                        scores trains the model to <em>maximize similarity for matched pairs</em> and minimize it
+                        for
                         unmatched pairs — similar in spirit to CLIP's training objective.</p>
                 </div>
 
                 <!-- 2.4 Auto-labeling -->
                 <h3 id="autolabel">Automated Data Labeling (Auto-Labeling Pipeline)</h3>
-                <p>To recognize patterns <em>outside</em> standard datasets (e.g., beyond COCO), the authors devised a
+                <p>To recognize patterns <em>outside</em> standard datasets (e.g., beyond COCO), the authors devised
+                    a
                     pipeline to generate training data from massive, noisy image-text pairs:</p>
 
                 <div class="pipeline">
@@ -1124,12 +1141,14 @@
                     Enables real-time detection of custom user-defined objects <em>without retraining</em>.
                     The offline vocabulary embeddings are reshaped and baked into the weights of <strong>1×1
                         Convolutional Layers</strong>.
-                    This mathematically transforms the semantic comparison operation into a standard, fast <em>matrix
+                    This mathematically transforms the semantic comparison operation into a standard, fast
+                    <em>matrix
                         multiplication</em>
                     typical of CNNs — removing all text encoder overhead at inference time.
                 </p>
                 <div class="callout warning">
-                    <p>This re-parameterization step is what makes YOLO-World competitive in latency with purely visual
+                    <p>This re-parameterization step is what makes YOLO-World competitive in latency with purely
+                        visual
                         detectors, despite supporting open-vocabulary queries.</p>
                 </div>
             </section>
@@ -1168,7 +1187,8 @@
                             <li><strong>Robotics &amp; Edge AI</strong>: lightweight design, high frame rates</li>
                             <li><strong>Real-time video</strong>: outperforms Transformers for streaming tasks</li>
                             <li><strong>Foundation model distillation</strong>: template for segmentation, etc.</li>
-                            <li><strong>Democratized detection</strong>: accessible via natural-language prompts</li>
+                            <li><strong>Democratized detection</strong>: accessible via natural-language prompts
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -1193,7 +1213,8 @@
                         creating strong zero-shot capabilities.
                     </p>
                     <p>
-                        However, it relies on <strong>heavy backbones</strong> (Swin Transformers) and processes image
+                        However, it relies on <strong>heavy backbones</strong> (Swin Transformers) and processes
+                        image
                         and text
                         <em>simultaneously</em> at every inference, causing high computational cost.
                     </p>
@@ -1212,7 +1233,8 @@
                     <h3 style="margin-top:0;">Grounding DINO</h3>
                     <p>
                         <a href="https://arxiv.org/pdf/2303.05499" target="_blank" rel="noopener">Grounding DINO</a>
-                        merges DINO (Transformer) with GLIP's pre-training, employing extensive cross-modality fusion
+                        merges DINO (Transformer) with GLIP's pre-training, employing extensive cross-modality
+                        fusion
                         for
                         state-of-the-art open-set accuracy.
                     </p>
@@ -1282,7 +1304,8 @@
                         <ul style="padding-left:1.3rem; color:var(--muted); font-size:0.9rem; line-height:1.7;">
                             <li style="margin-bottom:0.8rem;">
                                 <strong style="color:#fff;">Part a — Traditional Object Detector:</strong>
-                                Relies on a <em>fixed vocabulary</em>; can only identify categories seen during training
+                                Relies on a <em>fixed vocabulary</em>; can only identify categories seen during
+                                training
                                 (e.g., COCO's 80 classes).
                                 Lacks flexibility for novel objects in open environments.
                             </li>
@@ -1294,7 +1317,8 @@
                             </li>
                             <li>
                                 <strong style="color:#fff;">Part c — YOLO-World:</strong>
-                                Lightweight YOLO + <em>prompt-then-detect</em> strategy. Users define prompts encoded
+                                Lightweight YOLO + <em>prompt-then-detect</em> strategy. Users define prompts
+                                encoded
                                 into an <em>offline vocabulary</em>
                                 via Text Encoder, re-parameterized into model weights. Enables rapid open-vocabulary
                                 detection without
@@ -1330,7 +1354,8 @@
                             <li><strong style="color:#fff;">Language Stream (Train):</strong> N-gram extracts noun
                                 phrases → encoded by pre-trained CLIP Transformer → embeddings \(W =
                                 \texttt{TextEncoder}(T)\).</li>
-                            <li><strong style="color:#fff;">Language Stream (Infer):</strong> Custom vocabulary encoded
+                            <li><strong style="color:#fff;">Language Stream (Infer):</strong> Custom vocabulary
+                                encoded
                                 <em>once</em> → offline matrix cached; no real-time text processing.
                             </li>
                         </ul>
@@ -1343,19 +1368,23 @@
                             </figure>
                         </div>
                         <ul style="padding-left:1.3rem; color:var(--muted); font-size:0.88rem; line-height:1.7;">
-                            <li><strong style="color:#fff;">Text→Image:</strong> Max-Sigmoid Attention in Text-guided
+                            <li><strong style="color:#fff;">Text→Image:</strong> Max-Sigmoid Attention in
+                                Text-guided
                                 CSPLayer highlights text-relevant image regions.</li>
                             <li><strong style="color:#fff;">Image→Text:</strong> Image-Pooling Attention aggregates
-                                image features via max pooling to update text embeddings into image-aware embeddings.
+                                image features via max pooling to update text embeddings into image-aware
+                                embeddings.
                             </li>
                         </ul>
 
                         <h4>Detection &amp; Contrastive Matching</h4>
                         <ul style="padding-left:1.3rem; color:var(--muted); font-size:0.88rem; line-height:1.7;">
-                            <li><strong style="color:#fff;">Bounding Box Regression:</strong> 3×3 convolutions predict
+                            <li><strong style="color:#fff;">Bounding Box Regression:</strong> 3×3 convolutions
+                                predict
                                 boxes \(\{b_k\}\).</li>
                             <li><strong style="color:#fff;">Text Contrastive Head:</strong> 3×3 convolutions produce
-                                object embedding \(e_k\), matched against image-aware text embeddings \(w_j\) via:</li>
+                                object embedding \(e_k\), matched against image-aware text embeddings \(w_j\) via:
+                            </li>
                         </ul>
                         <div class="math-block">
                             \[ s_{k,j} = \alpha \cdot \mathrm{L2\text{-}Norm}(e_k) \cdot
@@ -1398,8 +1427,10 @@
                                 <figcaption>Prompt: "person, desk lamp, laptop, pendant light"</figcaption>
                             </figure>
                         </div>
-                        <p style="font-size:0.87rem; color:var(--muted);">Without prompts the model auto-detects many
-                            common objects but may miss specific items. With custom prompts the results are cleaner and
+                        <p style="font-size:0.87rem; color:var(--muted);">Without prompts the model auto-detects
+                            many
+                            common objects but may miss specific items. With custom prompts the results are cleaner
+                            and
                             more targeted — but unlisted objects will be ignored.</p>
 
                         <h4>Bedroom Scene (<a href="https://www.pexels.com/photo/white-bed-cover-near-wall-279746/"
