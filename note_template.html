@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!--
+╔══════════════════════════════════════════════════════════════╗
+║              NOTE TEMPLATE — tawannt.github.io              ║
+║                                                              ║
+║  HOW TO USE                                                  ║
+║  1. Copy this file: cp note_template.html my_topic.html      ║
+║  2. Replace every <!-- TODO --> comment with real content ║
+║ 3. Add the new card to index.html notes grid ║
+║ 4. git add . && git commit -m "add note: my topic" ║
+╚══════════════════════════════════════════════════════════════╝
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- TODO: Update title and description -->
+    <title>Note Title — tawannt.github.io</title>
+    <meta name="description" content="TODO: One-sentence description of this note.">
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- MathJax — remove these 2 lines if no math needed -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]'], ['$$', '$$']] },
+            options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* ════════════════════════════════════════════════════
+           DESIGN TOKENS — do not change these
+           ════════════════════════════════════════════════════ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0d0f14;
+            --surface: #161b24;
+            --surface2: #1e2533;
+            --border: rgba(255, 255, 255, 0.07);
+            --accent: #4f9eff;
+            /* blue  — primary accent  */
+            --accent2: #a78bfa;
+            /* purple — secondary      */
+            --accent3: #34d399;
+            /* green  — third          */
+            --text: #e2e8f0;
+            --muted: #8892a4;
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.75;
+            font-size: 16px;
+        }
+
+        /* ════════════════════════════════════════════════════
+           HERO SECTION
+           ════════════════════════════════════════════════════ */
+        .hero {
+            background: linear-gradient(135deg, #0d0f14 0%, #111827 40%, #0f1a2e 70%, #0d0f14 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 5rem 2rem 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% -10%, rgba(79, 158, 255, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 80% 80%, rgba(167, 139, 250, 0.10) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        /* Small label pill above the title */
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(79, 158, 255, 0.12);
+            border: 1px solid rgba(79, 158, 255, 0.3);
+            color: var(--accent);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 4px 14px;
+            border-radius: 100px;
+            margin-bottom: 1.4rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.4rem);
+            font-weight: 800;
+            line-height: 1.15;
+            background: linear-gradient(135deg, #fff 30%, var(--accent) 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .hero-sub {
+            font-size: 1.1rem;
+            color: var(--muted);
+            max-width: 680px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Metadata chips row (author, institution, links, …) */
+        .hero-meta {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        .hero-meta span {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 4px 14px;
+        }
+
+        .hero-meta a {
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        .hero-meta a:hover {
+            color: var(--accent);
+        }
+
+        /* ════════════════════════════════════════════════════
+           PAGE LAYOUT (sidebar + content)
+           ════════════════════════════════════════════════════ */
+        .page-wrap {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ════════════════════════════════════════════════════
+           STICKY SIDEBAR TOC
+           ════════════════════════════════════════════════════ */
+        .toc {
+            position: sticky;
+            top: 1.5rem;
+            align-self: start;
+            padding: 2rem 1.5rem 2rem 0;
+            border-right: 1px solid var(--border);
+            font-size: 0.83rem;
+            height: calc(100vh - 3rem);
+            overflow-y: auto;
+        }
+
+        .toc-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+
+        /* Top-level TOC links */
+        .toc ol {
+            list-style: none;
+        }
+
+        .toc>ol>li {
+            margin-bottom: 0.5rem;
+        }
+
+        .toc>ol>li>a {
+            font-weight: 600;
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .toc>ol>li>a:hover {
+            color: var(--accent);
+        }
+
+        /* Second-level TOC links */
+        .toc ol ol {
+            padding-left: 1rem;
+            margin-top: 0.3rem;
+        }
+
+        .toc ol ol li {
+            margin-bottom: 0.25rem;
+        }
+
+        .toc ol ol a {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .toc ol ol a:hover {
+            color: var(--text);
+        }
+
+        /* ════════════════════════════════════════════════════
+           MAIN CONTENT AREA
+           ════════════════════════════════════════════════════ */
+        main {
+            padding: 3rem 2.5rem 5rem;
+            min-width: 0;
+        }
+
+        /* Back link at top of content */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--muted);
+            text-decoration: none;
+            margin-bottom: 2.5rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        /* Section spacing */
+        section {
+            margin-bottom: 4rem;
+        }
+
+        /* Section label pill (e.g. "Section 1") */
+        .section-number {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.4rem;
+        }
+
+        /* Section divider */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        /* ════════════════════════════════════════════════════
+           TYPOGRAPHY
+           ════════════════════════════════════════════════════ */
+        h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.3rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid;
+            border-image: linear-gradient(90deg, var(--accent), transparent) 1;
+        }
+
+        h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 1.8rem 0 0.7rem;
+        }
+
+        h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent2);
+            margin: 1.2rem 0 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        em {
+            color: #c4b5fd;
+            font-style: italic;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        ul,
+        ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        li {
+            margin-bottom: 0.4rem;
+            line-height: 1.6;
+        }
+
+        /* ════════════════════════════════════════════════════
+           COMPONENT: CARD  (.card)
+           — generic bordered box for any text block
+           ════════════════════════════════════════════════════ */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem 1.8rem;
+            margin: 1.2rem 0;
+        }
+
+        .card h4 {
+            margin-top: 0;
+        }
+
+        /* ════════════════════════════════════════════════════
+           COMPONENT: CARD GRID  (.card-grid > .feature-card)
+           — 2-column responsive grid of cards
+           ════════════════════════════════════════════════════ */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin: 1.2rem 0;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.4rem 1.6rem;
+            transition: border-color 0.25s, transform 0.25s;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(79, 158, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .feature-card h4 {
+            margin-top: 0;
+        }
+
+        /* ════════════════════════════════════════════════════
+           COMPONENT: CALLOUT  (.callout.info / .callout.warning)
+           — highlighted note box
+           ════════════════════════════════════════════════════ */
+        .callout {
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.3rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .callout.info {
+            background: rgba(79, 158, 255, 0.08);
+            border-left: 3px solid var(--accent);
+        }
+
+        .callout.warning {
+            background: rgba(251, 191, 36, 0.08);
+            border-left: 3px solid #fbbf24;
+        }
+
+        .callout.success {
+            background: rgba(52, 211, 153, 0.08);
+            border-left: 3px solid var(--accent3);
+        }
+
+        .callout p {
+            margin: 0;
+        }
+
+        /* ════════════════════════════════════════════════════
+           COMPONENT: MATH BLOCK  (.math-block)
+           — dark box for display-mode equations
+           ════════════════════════════════════════════════════ */
+        .math-block {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent2);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.4rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ════════════════════════════════════════════════════
+           COMPONENT: PROS / CONS / POTENTIAL  (.pcp-grid)
+           — three-column evaluation cards
+           ════════════════════════════════════════════════════ */
+        .pcp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 1.2rem 0;
+        }
+
+        .pcp-card {
+            border-radius: var(--radius);
+            padding: 1.3rem 1.5rem;
+        }
+
+        .pcp-card.pros {
+            background: rgba(52, 211, 153, 0.07);
+            border: 1px solid rgba(52, 211, 153, 0.25);
+        }
+
+        .pcp-card.cons {
+            background: rgba(248, 113, 113, 0.07);
+            border: 1px solid rgba(248, 113, 113, 0.25);
+        }
+
+        .pcp-card.potential {
+            background: rgba(167, 139, 250, 0.07);
+            border: 1px solid rgba(167, 139, 250, 0.25);
+        }
+
+        .pcp-card h4 {
+            margin: 0 0 0.8rem;
+            font-size: 1rem;
+        }
+
+        .pcp-card.pros h4 {
+            color: var(--accent3);
+        }
+
+        .pcp-card.cons h4 {
+            color: #f87171;
+        }
+
+        .pcp-card.potential h4 {
+            color: var(--accent2);
+        }
+
+        .pcp-card ul {
+            padding-left: 1.2rem;
+        }
+
+        .pcp-card li {
+            font-size: 0.87rem;
+            color: var(--muted);
+            margin-bottom: 0.4rem;
+            line-height: 1.5;
+        }
+
+        .pcp-card li strong {
+            color: var(--text);
+        }
+
+        /* ════════════════════════════════════════════════════
+           COMPONENT: TAGS  (.tag .tag-blue / .tag-green / etc.)
+           — inline coloured label chips
+           ════════════════════════════════════════════════════ */
+        .tag {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 100px;
+            margin: 2px;
+        }
+
+        .tag-blue {
+            background: rgba(79, 158, 255, 0.15);
+            color: #4f9eff;
+        }
+
+        .tag-green {
+            background: rgba(52, 211, 153, 0.15);
+            color: #34d399;
+        }
+
+        .tag-red {
+            background: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+        }
+
+        .tag-purple {
+            background: rgba(167, 139, 250, 0.15);
+            color: #a78bfa;
+        }
+
+        /* ════════════════════════════════════════════════════
+           COMPONENT: TIMELINE  (.timeline > .timeline-item)
+           — vertical bullet timeline
+           ════════════════════════════════════════════════════ */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 4px;
+            bottom: 4px;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent), var(--accent2), var(--accent3));
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.7rem;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--bg);
+        }
+
+        .timeline-item:nth-child(2)::before {
+            background: var(--accent2);
+        }
+
+        .timeline-item:nth-child(3)::before {
+            background: var(--accent3);
+        }
+
+        .timeline-item h4 {
+            margin: 0 0 0.3rem;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .timeline-item p {
+            font-size: 0.87rem;
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* ════════════════════════════════════════════════════
+           COMPONENT: TABLE  (.table-wrap > table)
+           — dark themed comparison table
+           ════════════════════════════════════════════════════ */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 1.2rem 0;
+            border-radius: var(--radius);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        thead tr {
+            background: linear-gradient(90deg, rgba(79, 158, 255, 0.15), rgba(167, 139, 250, 0.15));
+        }
+
+        th {
+            padding: 0.9rem 1.1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #fff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 0.8rem 1.1rem;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        td strong {
+            color: var(--text);
+        }
+
+        /* ════════════════════════════════════════════════════
+           COMPONENT: PIPELINE  (.pipeline > .pipe-step)
+           — horizontal step-by-step flow
+           ════════════════════════════════════════════════════ */
+        .pipeline {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0;
+            margin: 1.2rem 0;
+            align-items: stretch;
+        }
+
+        .pipe-step {
+            flex: 1;
+            min-width: 140px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.1rem 1rem;
+            position: relative;
+            text-align: center;
+        }
+
+        .pipe-step:first-child {
+            border-radius: var(--radius) 0 0 var(--radius);
+        }
+
+        .pipe-step:last-child {
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+
+        .pipe-step:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            right: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            font-size: 1rem;
+            z-index: 1;
+        }
+
+        .pipe-step .pipe-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #fff;
+            display: block;
+        }
+
+        .pipe-step .pipe-desc {
+            font-size: 0.72rem;
+            color: var(--muted);
+            display: block;
+            margin-top: 0.3rem;
+        }
+
+        /* ════════════════════════════════════════════════════
+           COMPONENT: ACCORDION  (<details> / <summary>)
+           — collapsible appendix sections
+           ════════════════════════════════════════════════════ */
+        details {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 1rem 1.4rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #fff;
+            user-select: none;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::before {
+            content: '▶';
+            font-size: 0.65rem;
+            color: var(--accent);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        details[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        .details-body {
+            padding: 0 1.4rem 1.4rem;
+        }
+
+        /* ════════════════════════════════════════════════════
+           COMPONENT: FIGURES  (.fig-row > figure)
+           — one or two images side by side
+           ════════════════════════════════════════════════════ */
+        .fig-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.4rem 0;
+        }
+
+        .fig-row.single {
+            grid-template-columns: 1fr;
+            max-width: 680px;
+        }
+
+        .fig-row.single-sm {
+            grid-template-columns: 1fr;
+            max-width: 420px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        figure {
+            margin: 0;
+            text-align: center;
+        }
+
+        figure img {
+            width: 100%;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            display: block;
+        }
+
+        figcaption {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        /* ════════════════════════════════════════════════════
+           RESPONSIVE
+           ════════════════════════════════════════════════════ */
+        @media (max-width: 900px) {
+            .page-wrap {
+                grid-template-columns: 1fr;
+            }
+
+            .toc {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 2rem 1.2rem 4rem;
+            }
+
+            .fig-row {
+                grid-template-columns: 1fr;
+            }
+
+            .pipeline {
+                flex-direction: column;
+            }
+
+            .pipe-step {
+                border-radius: var(--radius) !important;
+            }
+
+            .pipe-step:not(:last-child)::after {
+                content: '↓';
+                right: 50%;
+                top: auto;
+                bottom: -14px;
+                transform: translateX(50%);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ════════════════════════════════════════════════════
+         HERO SECTION
+         TODO: fill in badge, title, subtitle, meta chips
+         ════════════════════════════════════════════════════ -->
+    <header class="hero">
+        <!-- TODO: e.g. "Technical Report" / "Lecture Note" / "Paper Walkthrough" -->
+        <div class="hero-badge">Technical Report</div>
+
+        <!-- TODO: Note title -->
+        <h1>Note Title Goes Here</h1>
+
+        <!-- TODO: One-line summary -->
+        <p class="hero-sub">
+            A short description of what this note covers — one or two sentences.
+        </p>
+
+        <!-- TODO: Author, date, links. Remove <span>s you don't need. -->
+        <div class="hero-meta">
+            <span>Author / Institution</span>
+            <span>Year</span>
+            <span><a href="#">Paper / Source</a></span>
+            <span><a href="#">GitHub</a></span>
+        </div>
+    </header>
+
+    <!-- ════════════════════════════════════════════════════
+         PAGE BODY = sidebar TOC + main content
+         ════════════════════════════════════════════════════ -->
+    <div class="page-wrap">
+
+        <!-- ── Sidebar Table of Contents ────────────────── -->
+        <!-- TODO: mirror every section id you create below -->
+        <aside class="toc">
+            <p class="toc-title">On this page</p>
+            <ol>
+                <li>
+                    <a href="#section1">Section 1 Title</a>
+                    <!-- Optional: second-level links -->
+                    <ol>
+                        <li><a href="#subsection1a">Subsection A</a></li>
+                        <li><a href="#subsection1b">Subsection B</a></li>
+                    </ol>
+                </li>
+                <li><a href="#section2">Section 2 Title</a></li>
+                <li><a href="#section3">Section 3 Title</a></li>
+                <li><a href="#appendix">Appendix</a></li>
+            </ol>
+        </aside>
+
+        <!-- ── Main content ──────────────────────────────── -->
+        <main>
+            <a href="index.html" class="back-link">← Back to Home</a>
+
+
+            <!-- ════════════════════════════════════════════
+                 SECTION 1 — replace with your content
+                 ════════════════════════════════════════════ -->
+            <section id="section1">
+                <div class="section-number">Section 1</div>
+                <h2>Section 1 Title</h2>
+
+                <p>
+                    Regular paragraph text. Use <strong>strong</strong> for emphasis and <em>em</em> for
+                    italics. Link with <a href="#">anchor text</a>.
+                </p>
+
+                <!-- ── CARD ── -->
+                <div class="card">
+                    <h4>Card Heading</h4>
+                    <p>Use a card for a self-contained idea or definition block.</p>
+                </div>
+
+                <!-- ── SUBSECTION ── -->
+                <h3 id="subsection1a">Subsection A</h3>
+                <p>Subsection content.</p>
+
+                <!-- ── CALLOUT: info ── -->
+                <div class="callout info">
+                    <p><strong>Note:</strong> Use callout.info for helpful tips or important context.</p>
+                </div>
+
+                <!-- ── CALLOUT: warning ── -->
+                <div class="callout warning">
+                    <p><strong>Warning:</strong> Use callout.warning for caveats or gotchas.</p>
+                </div>
+
+                <!-- ── MATH BLOCK ── -->
+                <div class="math-block">
+                    \[ \mathcal{L}(\theta) = \sum_{i=1}^n \log f(x_i \mid \theta) \]
+                </div>
+                <p style="font-size:0.88rem; color:var(--muted);">
+                    Caption under math: where \(\theta\) is whatever parameter you're estimating.
+                </p>
+
+                <!-- ── CARD GRID ── -->
+                <h3 id="subsection1b">Subsection B — Feature Cards</h3>
+                <div class="card-grid">
+                    <div class="feature-card">
+                        <h4>Feature One</h4>
+                        <p>Short description of this feature or concept.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Feature Two</h4>
+                        <p>Short description of this feature or concept.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Feature Three</h4>
+                        <p>Short description of this feature or concept.</p>
+                    </div>
+                </div>
+
+                <!-- ── TAGS ── -->
+                <div>
+                    <span class="tag tag-blue">Tag Blue</span>
+                    <span class="tag tag-green">Tag Green</span>
+                    <span class="tag tag-red">Tag Red</span>
+                    <span class="tag tag-purple">Tag Purple</span>
+                </div>
+            </section>
+
+            <hr>
+
+
+            <!-- ════════════════════════════════════════════
+                 SECTION 2
+                 ════════════════════════════════════════════ -->
+            <section id="section2">
+                <div class="section-number">Section 2</div>
+                <h2>Section 2 Title</h2>
+
+                <!-- ── TIMELINE ── -->
+                <h3>Timeline Component</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h4>Step / Era One</h4>
+                        <p>Description of this phase. <span class="tag tag-red">Limitation</span></p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>Step / Era Two</h4>
+                        <p>Description of this phase. <span class="tag tag-blue">Improvement</span></p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>Step / Era Three</h4>
+                        <p>Description of this phase. <span class="tag tag-green">Current</span></p>
+                    </div>
+                </div>
+
+                <!-- ── PIPELINE ── -->
+                <h3>Pipeline Component</h3>
+                <div class="pipeline">
+                    <div class="pipe-step">
+                        <span class="pipe-label">Step 1</span>
+                        <span class="pipe-desc">Short description</span>
+                    </div>
+                    <div class="pipe-step">
+                        <span class="pipe-label">Step 2</span>
+                        <span class="pipe-desc">Short description</span>
+                    </div>
+                    <div class="pipe-step">
+                        <span class="pipe-label">Step 3</span>
+                        <span class="pipe-desc">Short description</span>
+                    </div>
+                    <div class="pipe-step">
+                        <span class="pipe-label">Step 4</span>
+                        <span class="pipe-desc">Short description</span>
+                    </div>
+                </div>
+
+                <!-- ── TABLE ── -->
+                <h3>Comparison Table</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Property A</th>
+                                <th>Property B</th>
+                                <th>Limitation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Method 1</strong></td>
+                                <td>Value</td>
+                                <td><span class="tag tag-green">Good</span></td>
+                                <td>Some limitation</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Method 2</strong></td>
+                                <td>Value</td>
+                                <td><span class="tag tag-red">Poor</span></td>
+                                <td>Some limitation</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ── FIGURES ── -->
+                <h3>Figures</h3>
+
+                <!-- Two images side by side -->
+                <div class="fig-row">
+                    <figure>
+                        <img src="img/your_image_1.png" alt="Description of image 1" loading="lazy">
+                        <figcaption>Fig 1. Caption for image 1</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="img/your_image_2.png" alt="Description of image 2" loading="lazy">
+                        <figcaption>Fig 2. Caption for image 2</figcaption>
+                    </figure>
+                </div>
+
+                <!-- Single full-width image -->
+                <div class="fig-row single">
+                    <figure>
+                        <img src="img/your_wide_image.png" alt="Wide image description" loading="lazy">
+                        <figcaption>Fig 3. Caption for wide image</figcaption>
+                    </figure>
+                </div>
+
+                <!-- Single small centered image -->
+                <div class="fig-row single-sm">
+                    <figure>
+                        <img src="img/your_small_image.png" alt="Small image description" loading="lazy">
+                        <figcaption>Fig 4. Caption for small image</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <hr>
+
+
+            <!-- ════════════════════════════════════════════
+                 SECTION 3 — Pros / Cons / Potential
+                 ════════════════════════════════════════════ -->
+            <section id="section3">
+                <div class="section-number">Section 3</div>
+                <h2>Pros, Cons &amp; Potential</h2>
+
+                <div class="pcp-grid">
+                    <div class="pcp-card pros">
+                        <h4>Pros</h4>
+                        <ul>
+                            <li><strong>Strength one</strong> — explanation</li>
+                            <li><strong>Strength two</strong> — explanation</li>
+                        </ul>
+                    </div>
+                    <div class="pcp-card cons">
+                        <h4>Cons</h4>
+                        <ul>
+                            <li><strong>Weakness one</strong> — explanation</li>
+                            <li><strong>Weakness two</strong> — explanation</li>
+                        </ul>
+                    </div>
+                    <div class="pcp-card potential">
+                        <h4>Potential</h4>
+                        <ul>
+                            <li><strong>Opportunity one</strong> — explanation</li>
+                            <li><strong>Opportunity two</strong> — explanation</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <hr>
+
+
+            <!-- ════════════════════════════════════════════
+                 APPENDIX — collapsible accordion sections
+                 ════════════════════════════════════════════ -->
+            <section id="appendix">
+                <div class="section-number">Appendix</div>
+                <h2>Appendix</h2>
+
+                <!-- Open by default: add the "open" attribute -->
+                <details open>
+                    <summary>A1 — First Appendix Section</summary>
+                    <div class="details-body">
+                        <p style="color:var(--muted); font-size:0.9rem;">
+                            Content of the first appendix section. Can contain any components.
+                        </p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>A2 — Second Appendix Section</summary>
+                    <div class="details-body">
+                        <p style="color:var(--muted); font-size:0.9rem;">
+                            More detailed supplementary content goes here.
+                        </p>
+                        <div class="math-block">
+                            \[ f(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right) \]
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>A3 — Third Appendix Section</summary>
+                    <div class="details-body">
+                        <p style="color:var(--muted); font-size:0.9rem;">
+                            Additional supplementary content.
+                        </p>
+                    </div>
+                </details>
+            </section>
+
+        </main>
+    </div><!-- /.page-wrap -->
+
+    <!-- ════════════════════════════════════════════════════
+         FOOTER — update the paper/source link
+         ════════════════════════════════════════════════════ -->
+    <footer
+        style="text-align:center; padding:2rem; border-top:1px solid var(--border); color:var(--muted); font-size:0.82rem;">
+        <!-- TODO: update title and source link -->
+        Note on Topic &nbsp;·&nbsp; <a href="#" target="_blank" rel="noopener">Source / Paper</a>
+        &nbsp;·&nbsp; <a href="index.html">← Home</a>
+    </footer>
+
+</body>
+
+</html>
