@@ -112,6 +112,32 @@
             margin: 0 auto 2rem;
         }
 
+        /* ── Nav ──────────────────────────────────────── */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(13, 15, 20, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+        }
+
+        .nav-logo {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .nav-logo span {
+            color: var(--accent);
+        }
+
         /* Date badge — top-right of hero */
         .hero-date {
             position: absolute;
@@ -156,12 +182,12 @@
         /* ── Sidebar TOC ─────────────────────────────────── */
         .toc {
             position: sticky;
-            top: 1.5rem;
+            top: calc(56px + 1.5rem);
             align-self: start;
             padding: 2rem 1.5rem 2rem 0;
             border-right: 1px solid var(--border);
             font-size: 0.83rem;
-            height: calc(100vh - 3rem);
+            height: calc(100vh - 56px - 3rem);
             overflow-y: auto;
         }
 
@@ -777,6 +803,12 @@
 
 <body>
 
+    <!-- Nav -->
+    <nav>
+        <a href="index.html" class="nav-logo">tawannt<span>.github.io</span></a>
+        <a href="index.html" class="back-link">← Home</a>
+    </nav>
+
     <!-- ── Hero ─────────────────────────────────────────────── -->
     <header class="hero">
         <div class="hero-date">09/12/2026</div>
@@ -832,7 +864,7 @@
 
         <!-- Main -->
         <main>
-            <a href="index.html" class="back-link">← Back to My Notes</a>
+            <a href="index.html" class="back-link">← Home</a>
 
             <!-- ════════════════════════════════════════════════════
          SECTION 1 – OVERVIEW
