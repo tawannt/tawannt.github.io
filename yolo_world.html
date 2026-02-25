@@ -113,7 +113,7 @@
         }
 
         /* ── Nav ──────────────────────────────────────── */
-        body>nav {
+        nav {
             position: sticky;
             top: 0;
             z-index: 100;
@@ -176,7 +176,6 @@
             grid-template-columns: 220px 1fr;
             max-width: 1200px;
             margin: 0 auto;
-            gap: 0;
         }
 
         /* ── Sidebar TOC ─────────────────────────────────── */
@@ -184,7 +183,7 @@
             position: sticky;
             top: calc(56px + 1.5rem);
             align-self: start;
-            padding: 2rem 1.5rem 2rem 1.5rem;
+            padding: 2rem 1.5rem 2rem 0;
             border-right: 1px solid var(--border);
             font-size: 0.83rem;
             height: calc(100vh - 56px - 3rem);
@@ -198,7 +197,6 @@
             text-transform: uppercase;
             color: var(--muted);
             margin-bottom: 1rem;
-            white-space: nowrap;
         }
 
         .toc ol {
