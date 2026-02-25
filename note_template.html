@@ -160,6 +160,34 @@
         }
 
         /* ════════════════════════════════════════════════════
+           NAVBAR
+           ════════════════════════════════════════════════════ */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(13, 15, 20, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+        }
+
+        .nav-logo {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .nav-logo span {
+            color: var(--accent);
+        }
+
+        /* ════════════════════════════════════════════════════
            DATE BADGE — top-right corner of hero
            ════════════════════════════════════════════════════ */
         .hero-date {
@@ -191,12 +219,12 @@
            ════════════════════════════════════════════════════ */
         .toc {
             position: sticky;
-            top: 1.5rem;
+            top: calc(56px + 1.5rem);
             align-self: start;
             padding: 2rem 1.5rem 2rem 0;
             border-right: 1px solid var(--border);
             font-size: 0.83rem;
-            height: calc(100vh - 3rem);
+            height: calc(100vh - 56px - 3rem);
             overflow-y: auto;
         }
 
@@ -265,7 +293,6 @@
             font-size: 0.85rem;
             color: var(--muted);
             text-decoration: none;
-            margin-bottom: 2.5rem;
             transition: color 0.2s;
         }
 
@@ -834,6 +861,13 @@
 
 <body>
 
+    <!-- Nav -->
+    <nav>
+        <a href="index.html" class="nav-logo">tawannt<span>.github.io</span></a>
+        <!-- TODO: update "Home" link if notes live in a subdirectory -->
+        <a href="index.html" class="back-link">← Home</a>
+    </nav>
+
     <!-- ════════════════════════════════════════════════════
          HERO SECTION
          TODO: fill in badge, title, subtitle, meta chips
@@ -887,7 +921,7 @@
 
         <!-- ── Main content ──────────────────────────────── -->
         <main>
-            <a href="index.html" class="back-link">← Back to Home</a>
+            <a href="index.html" class="back-link" style="margin-bottom:2.5rem;">← Home</a>
 
 
             <!-- ════════════════════════════════════════════
