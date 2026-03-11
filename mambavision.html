@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MambaVision: A Hybrid State Space Model</title>
+  <meta name="description"
+    content="A deep dive into MambaVision, combining SSM efficiency with Transformer context for Computer Vision.">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]'], ['$$', '$$']] },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #161b24;
+      --surface2: #1e2533;
+      --border: rgba(255, 255, 255, 0.07);
+      --accent: #4f9eff;
+      --accent2: #a78bfa;
+      --accent3: #34d399;
+      --text: #e2e8f0;
+      --muted: #8892a4;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      font-size: 16px;
+    }
+
+    /* ── Nav ───────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 15, 20, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+
+    .nav-logo {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .nav-logo span {
+      color: var(--accent);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* ── Hero ──────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #0d0f14 0%, #111827 40%, #0f1a2e 70%, #0d0f14 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 4rem 2rem 3.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(167, 139, 250, 0.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(167, 139, 250, 0.12);
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      color: var(--accent2);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 100px;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.6rem, 4vw, 2.6rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.8rem;
+    }
+
+    .hero-sub {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* Date badge — top-right of hero */
+    .hero-date {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 3px 12px;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Layout ───────────────────────────────────────── */
+    .page-wrap {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── TOC ───────────────────────────────────────── */
+    .toc {
+      position: sticky;
+      top: 1.5rem;
+      align-self: start;
+      padding: 2rem 1.5rem 2rem 0;
+      border-right: 1px solid var(--border);
+      font-size: 0.83rem;
+      height: calc(100vh - 3rem);
+      overflow-y: auto;
+    }
+
+    .toc-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .toc ol {
+      list-style: none;
+    }
+
+    .toc>ol>li {
+      margin-bottom: 0.5rem;
+    }
+
+    .toc>ol>li>a {
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .toc>ol>li>a:hover {
+      color: var(--accent);
+    }
+
+    .toc ol ol {
+      padding-left: 1rem;
+      margin-top: 0.3rem;
+    }
+
+    .toc ol ol li {
+      margin-bottom: 0.25rem;
+    }
+
+    .toc ol ol a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .toc ol ol a:hover {
+      color: var(--text);
+    }
+
+    @media (max-width: 900px) {
+      .page-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .toc {
+        display: none;
+      }
+    }
+
+    /* ── Content ─────────────────────────────────────── */
+    main {
+      padding: 3rem 2.5rem 5rem;
+      min-width: 0;
+    }
+
+    section {
+      margin-bottom: 4rem;
+    }
+
+    .section-number {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.3rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid;
+      border-image: linear-gradient(90deg, var(--accent), transparent) 1;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin: 1.8rem 0 0.7rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    strong {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    em {
+      color: #c4b5fd;
+      font-style: italic;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ── Math ──────────────────────────────────────── */
+    .math-block {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent2);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.4rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Callout ───────────────────────────────────── */
+    .callout {
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.3rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+
+    .callout.info {
+      background: rgba(167, 139, 250, 0.08);
+      border-left: 3px solid var(--accent2);
+    }
+
+    .callout p {
+      margin: 0;
+    }
+
+    ul,
+    ol {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    li {
+      margin-bottom: 0.4rem;
+      line-height: 1.6;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 3rem 0;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 2rem 1.2rem 4rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <a href="index.html" class="nav-logo">tawannt<span>.github.io</span></a>
+    <a href="index.html" class="back-link">← Home</a>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-date">11/03/2026</div>
+    <div class="hero-badge">Architecture Note</div>
+    <h1>MambaVision</h1>
+    <p class="hero-sub">Combining the linear-time efficiency of State Space Models with the global context of
+      Transformers for Vision.</p>
+  </header>
+
+  <!-- Body -->
+  <div class="page-wrap">
+
+    <!-- TOC -->
+    <aside class="toc">
+      <p class="toc-title">On this page</p>
+      <ol>
+        <li><a href="#methodology">Methodology</a>
+          <ol>
+            <li><a href="#limitations">Limitations of Predecessors</a></li>
+            <li><a href="#1d-problem">The 1D Problem in Vision</a></li>
+            <li><a href="#vmamba">VMamba Solution (SS2D)</a></li>
+            <li><a href="#efficient-vmamba">EfficientVMamba (ES2D)</a></li>
+            <li><a href="#mamba-issues">Remaining Mamba-based Issues</a></li>
+            <li><a href="#macro-arch">MambaVision Macro Architecture</a></li>
+            <li><a href="#micro-arch">MambaVision Mixer (Micro)</a></li>
+            <li><a href="#integration">Self-Attention & MLP Integration</a></li>
+            <li><a href="#representation">Representation Capability</a></li>
+          </ol>
+        </li>
+        <li><a href="#evaluation">Evaluation & Scope</a>
+          <ol>
+            <li><a href="#speed-accuracy">Speed & Accuracy</a></li>
+            <li><a href="#global-context">Global Context & Hierarchy</a></li>
+            <li><a href="#constraints">Limitations</a></li>
+            <li><a href="#applications">Future Applications</a></li>
+          </ol>
+        </li>
+      </ol>
+    </aside>
+
+    <!-- Main -->
+    <main>
+      <a href="index.html" class="back-link"
+        style="display:inline-flex; align-items:center; gap:6px; margin-bottom:2.5rem;">← Back to Home</a>
+
+
+      <!-- section 1 -->
+      <section id="methodology">
+        <div class="section-number">Section 1</div>
+        <h2>Methodology</h2>
+
+        <h3 id="limitations">Limitations of Predecessors</h3>
+        <ul>
+          <li><strong>Convolutional Neural Networks (CNN):</strong>
+            <ul>
+              <li>Inherent limitations regarding the <em>receptive field</em>.</li>
+              <li>Poor capability in capturing <em>long-range dependencies</em>.</li>
+            </ul>
+          </li>
+          <li><strong>Vision Transformer (ViT):</strong>
+            <ul>
+              <li>Powerful global context capturing thanks to Self-Attention.</li>
+              <li><em>Fatal flaw:</em> Quadratic computational complexity \(\mathcal{O}(N^2)\), making it extremely
+                resource-intensive at high resolutions.</li>
+            </ul>
+          </li>
+          <li><strong>The Mamba Solution:</strong>
+            <ul>
+              <li>Linear processing power \(\mathcal{O}(N)\).</li>
+              <li>Performance equivalent to Transformers but with speeds comparable to CNNs.</li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 id="1d-problem">Mamba-based in Vision – The 1D Problem</h3>
+        <ul>
+          <li>The original SSM structure only allows for <strong>sequential 1D scanning</strong> (1D Scan).</li>
+          <li>When processing images in a single direction (e.g., left \(\rightarrow\) right or top \(\rightarrow\)
+            bottom):
+            <ul>
+              <li><strong>Blind spots:</strong> Neighboring pixels in the vertical spatial dimension are not fully
+                connected.</li>
+              <li><strong>Biased Receptive Field:</strong> Pixels scanned later cannot see those that haven't been
+                scanned (the "future"), breaking the continuity of the content.</li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 id="vmamba">VMamba Solution: 2D-Selective-Scan (SS2D)</h3>
+        <p>Instead of using 2D convolutions (like CNNs) or global Attention (like ViTs), VMamba retains the linear
+          complexity of SSMs but alters how data is read.</p>
+        <div style="text-align:center; margin: 1.5rem 0;">
+          <img src="img/paper/mambavision/ss2d.png" alt="SS2D of VMamba vs Self-Attention"
+            style="max-width: 99%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">SS2D of VMamba compared to
+            Self-Attention</p>
+        </div>
+
+        <div style="text-align:center; margin: 1.5rem 0;">
+          <img src="img/paper/mambavision/vmamba.png" alt="VMamba Architecture"
+            style="max-width: 90%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+        </div>
+        <ul>
+          <li><strong>Cross-Scan (4 directions):</strong> The image is continuously scanned diagonally from four corners
+            to create a closed 2D spatial loop.</li>
+          <li><strong>Independent S6 Processing:</strong> The 4 sequences are processed discretely through the Selective
+            Scan block.</li>
+          <li><strong>Cross-Merge:</strong> The sequences are merged back together (\(\oplus\)) and reshaped into a
+            feature map with a multi-region receptive field, while maintaining \(\mathcal{O}(N)\) speed.</li>
+        </ul>
+
+        <h3 id="efficient-vmamba">EfficientVMamba Solution: ES2D</h3>
+        <div style="text-align:center; margin: 1.5rem 0;">
+          <img src="img/paper/mambavision/efficientvmamba.png" alt="ES2D of EfficientVMamba vs SS2D of VMamba"
+            style="max-width: 75%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">The ES2D mechanism (bottom) compared
+            to VMamba's SS2D (top)</p>
+        </div>
+        <p>EfficientVMamba also hybridizes SSM and Convolutions. It adds a parallel convolutional branch to the state
+          space block. This combination allows the model to extract highly localized features via Convolution
+          <em>AND</em> capture long-range dependencies via SSM.
+        </p>
+
+        <h3 id="mamba-issues">Current Issues with Mamba-based Models</h3>
+        <ul>
+          <li><strong>Data Structure Conflict:</strong> Mamba's autoregressive mechanism, originally designed for 1D
+            sequential data, is inefficient when handling the 2D spatial data of images.</li>
+          <li><strong>Still Missing Full Global Context:</strong> The step-by-step processing makes it difficult for the
+            model to grasp an overarching view and the relationships between distant regions in a single forward pass.
+          </li>
+          <li><strong>Performance Trade-offs (Vim/VMamba):</strong> Workarounds like bidirectional scanning or
+            cross-scanning significantly increase latency and computational overhead.</li>
+        </ul>
+
+        <h3 id="macro-arch">Overall MambaVision Architecture (Macro Architecture)</h3>
+        <div style="text-align:center; margin: 1.5rem 0;">
+          <img src="img/paper/mambavision/mambavisionArchitecture.png" alt="MambaVision Architecture"
+            style="max-width: 80%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+        </div>
+        <ul>
+          <li><strong>Stem (Processing):</strong> Uses 2 Convolutional Layers to scale down resolution (\(H/4, W/4\)).
+          </li>
+          <li><strong>Stages 1 & 2 (Feature Extraction):</strong> Applies standard Residual CNNs for ultra-fast feature
+            extraction.</li>
+          <li><strong>Stages 3 & 4 (Context Modeling):</strong> advances the computation of global dependencies using a
+            hybrid mixture of <strong>MambaVision Mixers</strong> and standard <strong>Transformers</strong>.</li>
+        </ul>
+
+        <h3 id="micro-arch">MambaVision Mixer (Micro Architecture)</h3>
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; align-items: start; margin: 1.5rem 0;">
+          <div>
+            <img src="img/paper/mambavision/mixer.png" alt="MambaVision Mixer"
+              style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          </div>
+          <div>
+            <p>The block is redesigned to adapt to non-causal image sequences:</p>
+            <ul>
+              <li><strong>Standard 1D Conv:</strong> Replaces Causal Convolutions to capture symmetric context from both
+                directions.</li>
+              <li><strong>Symmetric Branch:</strong> Adds a parallel path (Conv + SiLU) to compensate for the
+                information lost in the sequential SSM branch.</li>
+              <li><strong>Merge:</strong> The two branches are concatenated and passed through a linear projection
+                layer.</li>
+            </ul>
+          </div>
+        </div>
+
+        <p><strong>Comparison with the Original Mamba:</strong></p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; text-align: center;">
+          <div>
+            <img src="img/paper/mambavision/mamba.png" alt="Mamba Block"
+              style="max-width: 70%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+            <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">Original Mamba Block</p>
+          </div>
+          <div>
+            <img src="img/paper/mambavision/mixer.png" alt="MambaVision Mixer"
+              style="max-width: 70%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+            <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">MambaVision Mixer</p>
+          </div>
+        </div>
+
+        <p>The authors also conducted experiments to discover the most optimal Block design:</p>
+        <div style="text-align:center; margin: 1.5rem 0;">
+          <img src="img/paper/mambavision/table4.png" alt="Ablation on Block Design"
+            style="max-width: 50%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+        </div>
+
+        <h3 id="integration">Integration of Self-Attention and MLP Blocks</h3>
+        <div style="text-align:center; margin: 1.5rem 0;">
+          <img src="img/paper/mambavision/mambaMixer.png" alt="Integration of Self-Attention"
+            style="max-width: 60%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+        </div>
+        <ul>
+          <li><strong>Multi-Head Self-Attention:</strong> Introduced specifically in Stages 3 & 4 to comprehensively
+            capture global details that Mamba may miss, significantly enhancing the IoU for Instance Segmentation.</li>
+          <li><strong>MLP Block integration:</strong> Handles channel mixing and provides non-linearity after each
+            Mixer/Attention block.</li>
+        </ul>
+
+        <h3 id="representation">Representation Capability of MambaVision</h3>
+        <div style="text-align:center; margin: 1.5rem 0;">
+          <img src="img/paper/mambavision/visualMambaVision.png" alt="MambaVision Heatmaps"
+            style="max-width: 40%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+        </div>
+        <ul>
+          <li><strong>Robust semantic recognition:</strong> leads to highly accurate object boundary detection.</li>
+          <li>The <strong>Heatmap activations</strong> perfectly hug the shape and contour of the object without getting
+            distracted by background noise.</li>
+        </ul>
+      </section>
+
+      <hr>
+
+      <!-- section 2 -->
+      <section id="evaluation">
+        <div class="section-number">Section 2</div>
+        <h2>Technical Evaluation and Scope</h2>
+
+        <h3 id="speed-accuracy">Technical Advantages: Speed & Accuracy</h3>
+        <div style="text-align:center; margin: 1.5rem 0;">
+          <img src="img/paper/mambavision/table2.png" alt="Accuracy Table"
+            style="max-width: 75%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+        </div>
+        <ul>
+          <li>The hybrid architecture allows MambaVision to achieve <strong>superior accuracy</strong> (Box AP, Mask AP,
+            mIoU), completely outperforming heavyweight architectures like ConvNeXt, Swin Transformer, and VMamba.</li>
+          <li><strong>Higher Throughput:</strong> Achieved by pushing the heavy complex computations to the later stages
+            and reducing the spatial dimensions early on using CNNs.</li>
+        </ul>
+
+        <h3 id="global-context">Technical Advantages: Global Context & Multi-scale Hierarchy</h3>
+        <div style="text-align:center; margin: 1.5rem 0;">
+          <img src="img/paper/mambavision/table3.png" alt="Detailed Comparison"
+            style="max-width: 38%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+        </div>
+        <ul>
+          <li><strong>Global Context Mastery:</strong> Placing Transformers (Self-Attention) in Stages 3 and 4 completes
+            the "big picture" that isolated SSMs struggle to see \(\rightarrow\) highly optimized for Segmentation
+            tasks.</li>
+          <li><strong>Flexible Hierarchical Architecture:</strong> The network exposes feature maps at scales from \(1/4
+            \rightarrow 1/32\), making it incredibly practical to serve as a backbones for models like UPerNet or Mask
+            R-CNN.</li>
+        </ul>
+
+        <h3 id="constraints">Limitations and Challenges</h3>
+        <div style="text-align:center; margin: 1.5rem 0;">
+          <img src="img/paper/mambavision/table5.png" alt="Challenges and Trade-offs"
+            style="max-width: 55%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+        </div>
+        <ul>
+          <li><strong>Clunky Deployment:</strong> As a hybrid algorithm (Conv + S6 + Self-Attention + MLP), the
+            implementation codebase is convoluted, making it difficult to deploy uniformly on basic TPU hardware.</li>
+          <li><strong>Tied to NVIDIA GPUs:</strong> The core SSM relies heavily on the highly optimized `mamba_ssm` CUDA
+            package, rendering it unsuitable for Mobile or Edge environments at present.</li>
+          <li><strong>Rigorous Hyperparameter Tuning:</strong> The mixing ratio between <em>Mamba and Transformer</em>
+            components must be meticulously tuned to yield the best results (as evidenced in the table above).</li>
+        </ul>
+
+        <h3 id="applications">Scope of Technical Application</h3>
+        <ul>
+          <li><strong>Standard Tasks:</strong>
+            <ul>
+              <li>Image Classification (ImageNet benchmark).</li>
+              <li>Object Detection (COCO benchmark).</li>
+              <li>Instance / Semantic Segmentation on ADE20K.</li>
+            </ul>
+          </li>
+          <li><strong>Future Frontiers for MambaVision:</strong>
+            <ul>
+              <li><strong>Gigapixel Medical Pathology:</strong> Capable of handling massive Whole Slide Images (WSI)
+                where ViTs fail due to \(\mathcal{O}(N^2)\) memory constraints.</li>
+              <li><strong>Deep Video Understanding:</strong> Effortlessly mapping the <em>Time</em> dimension—a native
+                strength of RNNs/SSMs.</li>
+              <li><strong>Remote Sensing:</strong> Accurately identifying vast, contiguous geographic structures or
+                infrastructure.</li>
+            </ul>
+          </li>
+        </ul>
+
+      </section>
+
+    </main>
+  </div>
+
+  <footer
+    style="text-align:center; padding:2rem; border-top:1px solid var(--border); color:var(--muted); font-size:0.82rem;">
+    tawannt.github.io · <a href="index.html">← Back to Home</a>
+  </footer>
+
+</body>
+
+</html>
