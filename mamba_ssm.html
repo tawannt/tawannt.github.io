@@ -5,8 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>State Space Models & Mamba</title>
-  <meta name="description"
-    content="A walkthrough of State Space Models, Discretization, and the Mamba architecture.">
+  <meta name="description" content="A walkthrough of State Space Models, Discretization, and the Mamba architecture.">
 
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
@@ -328,7 +327,8 @@
       margin: 0;
     }
 
-    ul, ol {
+    ul,
+    ol {
       padding-left: 1.5rem;
       margin-bottom: 1rem;
       color: var(--text);
@@ -363,7 +363,7 @@
 
   <!-- Hero -->
   <header class="hero">
-    <div class="hero-date">03/11/2026</div>
+    <div class="hero-date">02/03/2026</div>
     <div class="hero-badge">Architecture Note</div>
     <h1>State Space Models & Mamba</h1>
     <p class="hero-sub">From continuous LTI systems to Hardware-aware Selective Scan.</p>
@@ -386,18 +386,21 @@
         <li><a href="#selective-ssm">Selective SSM (S6)</a></li>
         <li><a href="#scan">Hardware-aware Selective Scan</a></li>
         <li><a href="#mamba-block">Mamba Block</a></li>
+        <li><a href="#references">References</a></li>
       </ol>
     </aside>
 
     <!-- Main -->
     <main>
-      <a href="index.html" class="back-link" style="display:inline-flex; align-items:center; gap:6px; margin-bottom:2.5rem;">← Back to Home</a>
+      <a href="index.html" class="back-link"
+        style="display:inline-flex; align-items:center; gap:6px; margin-bottom:2.5rem;">← Back to Home</a>
 
       <section id="ssm-basics">
         <div class="section-number">Section 1</div>
         <h2>Basics of State Space Models (SSM)</h2>
         <ul>
-          <li>SSM describes the representation of a latent state and predicts the next state based on the input received.</li>
+          <li>SSM describes the representation of a latent state and predicts the next state based on the input
+            received.</li>
           <li>It maps components using a system of linear differential equations:
             <div class="math-block">
               \[ h'(t) = A h(t) + B x(t) \]
@@ -415,10 +418,13 @@
         <div class="section-number">Section 2</div>
         <h2>Discretization</h2>
         <ul>
-          <li>In practice, we mainly process discrete signals (such as images or language), so the continuous SSM must be discretized.</li>
-          <li>To make it easier to understand, we can illustrate the discretization process by solving the differential equation \(h'(t) = Ah(t) + Bx(t)\) using <strong>Euler's Method</strong>.</li>
+          <li>In practice, we mainly process discrete signals (such as images or language), so the continuous SSM must
+            be discretized.</li>
+          <li>To make it easier to understand, we can illustrate the discretization process by solving the differential
+            equation \(h'(t) = Ah(t) + Bx(t)\) using <strong>Euler's Method</strong>.</li>
         </ul>
-        <p>Based on the approximation definition of a derivative: \(\lim_{\Delta \to 0} \frac{h(t + \Delta) - h(t)}{\Delta} = h'(t)\). For a sufficiently small time step \(\Delta\), we have:</p>
+        <p>Based on the approximation definition of a derivative: \(\lim_{\Delta \to 0} \frac{h(t + \Delta) -
+          h(t)}{\Delta} = h'(t)\). For a sufficiently small time step \(\Delta\), we have:</p>
         <div class="math-block">
           \[ h(t + \Delta) \approx \Delta h'(t) + h(t) \]
         </div>
@@ -426,13 +432,14 @@
         <div class="math-block">
           \[ \begin{align*}
           h(t + \Delta) &\approx \Delta \big(A h(t) + B x(t)\big) + h(t) \\
-                        &= \Delta A h(t) + \Delta B x(t) + h(t) \\
-                        &= (I + \Delta A) h(t) + \Delta B x(t) \\
-                        &= \bar{A} h(t) + \bar{B} x(t)
+          &= \Delta A h(t) + \Delta B x(t) + h(t) \\
+          &= (I + \Delta A) h(t) + \Delta B x(t) \\
+          &= \bar{A} h(t) + \bar{B} x(t)
           \end{align*} \]
         </div>
-        <p>Thus, we obtain the function \( h(t + 1) = \bar{A} h(t) + \bar{B} x(t) \) where \(\bar{A} = I + \Delta A\) and \(\bar{B} = \Delta B\).</p>
-        
+        <p>Thus, we obtain the function \( h(t + 1) = \bar{A} h(t) + \bar{B} x(t) \) where \(\bar{A} = I + \Delta A\)
+          and \(\bar{B} = \Delta B\).</p>
+
         <h3>Zero-Order Hold (ZOH)</h3>
         <p>The standard method currently used for SSMs is <strong>Zero-Order Hold (ZOH)</strong>:</p>
         <div class="math-block">
@@ -442,17 +449,18 @@
         <p>The discrete equations corresponding to the time step \(\Delta\) become:</p>
         <div class="math-block">
           \[ \begin{cases}
-              h'(t) = A h(t) + B x(t) \\
-              y(t)  = C h(t) + D x(t)
+          h'(t) = A h(t) + B x(t) \\
+          y(t) = C h(t) + D x(t)
           \end{cases}
           \quad \rightarrow \quad
           \begin{cases}
-              h_{t} = \bar{A} h_{t-1} + \bar{B} x_{t} \\
-              y_{t} = C h_{t} + D x_{t}
+          h_{t} = \bar{A} h_{t-1} + \bar{B} x_{t} \\
+          y_{t} = C h_{t} + D x_{t}
           \end{cases} \]
         </div>
         <div class="callout info">
-          <p><strong>Note:</strong> In practice, the step size \(\Delta\) is not chosen arbitrarily but is treated as a learnable parameter during model training.</p>
+          <p><strong>Note:</strong> In practice, the step size \(\Delta\) is not chosen arbitrarily but is treated as a
+            learnable parameter during model training.</p>
         </div>
       </section>
 
@@ -462,13 +470,16 @@
         <div class="section-number">Section 3</div>
         <h2>Intuition & Meaning of SSM Parameters</h2>
         <div style="text-align:center; margin: 1.5rem 0;">
-          <img src="img/paper/mamba/ssm.png" alt="SSM Architecture" style="max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <img src="img/paper/mamba/ssm.png" alt="SSM Architecture"
+            style="max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
         </div>
         <ul>
-          <li><strong>Matrix \(\bar{A}\):</strong> The transformation process, which decides whether to forget or remember the past.</li>
+          <li><strong>Matrix \(\bar{A}\):</strong> The transformation process, which decides whether to forget or
+            remember the past.</li>
           <li><strong>Matrix \(\bar{B}\):</strong> Projects the core information from the current input.</li>
           <li><strong>Matrix \(C\):</strong> Transforms the hidden state into the predicted output \(y_t\).</li>
-          <li><strong>Matrix \(D\):</strong> Usually omitted to simplify computation (ignoring the skip connection in the formula): \(y_{t} = C h_{t}\).</li>
+          <li><strong>Matrix \(D\):</strong> Usually omitted to simplify computation (ignoring the skip connection in
+            the formula): \(y_{t} = C h_{t}\).</li>
         </ul>
       </section>
 
@@ -477,36 +488,45 @@
       <section id="parallel-computation">
         <div class="section-number">Section 4</div>
         <h2>Parallel Computation of SSM</h2>
-        
+
         <h3>Recurrent Computation</h3>
         <ul>
           <li>\(h_t\) depends directly on \(h_{t-1}\).</li>
-          <li><em>Characteristics:</em> The inference process is very fast and efficient, but training <strong>cannot be parallelized</strong>.</li>
+          <li><em>Characteristics:</em> The inference process is very fast and efficient, but training <strong>cannot be
+              parallelized</strong>.</li>
         </ul>
         <div style="text-align:center; margin: 1.5rem 0;">
-          <img src="img/paper/mamba/recurrent.png" alt="Recurrent Computation" style="max-width: 80%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-          <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">Source: <a href="https://www.maartengrootendorst.com/blog/mamba/" target="_blank">Maarten Grootendorst</a></p>
+          <img src="img/paper/mamba/recurrent.png" alt="Recurrent Computation"
+            style="max-width: 80%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">Source: <a
+              href="https://www.maartengrootendorst.com/blog/mamba/" target="_blank" rel="noopener noreferrer">Maarten Grootendorst</a></p>
         </div>
 
         <h3>Convolutional Computation</h3>
-        <p>Because of the LTI properties, SSMs can be computed using convolutions. If we assume the initial state \(h_0 = 0\), we can manually walk through the first 3 steps to uncover an interesting pattern:</p>
+        <p>Because of the LTI properties, SSMs can be computed using convolutions. If we assume the initial state \(h_0
+          = 0\), we can manually walk through the first 3 steps to uncover an interesting pattern:</p>
         <div class="math-block">
           \[ \begin{align*}
           \textbf{Step 1:} \quad h_1 &= \bar{A}(0) + \bar{B}x_1 = \bar{B}x_1 \\
           \Rightarrow y_1 &= C h_1 = C\bar{B}x_1 \\[0.5em]
           \textbf{Step 2:} \quad h_2 &= \bar{A}h_1 + \bar{B}x_2 = \bar{A}(\bar{B}x_1) + \bar{B}x_2 \\
           \Rightarrow y_2 &= C h_2 = C\bar{A}\bar{B}x_1 + C\bar{B}x_2 \\[0.5em]
-          \textbf{Step 3:} \quad h_3 &= \bar{A}h_2 + \bar{B}x_3 = \bar{A}(\bar{A}\bar{B}x_1 + \bar{B}x_2) + \bar{B}x_3 \\
+          \textbf{Step 3:} \quad h_3 &= \bar{A}h_2 + \bar{B}x_3 = \bar{A}(\bar{A}\bar{B}x_1 + \bar{B}x_2) + \bar{B}x_3
+          \\
           & = \bar{A}^2\bar{B}x_1 + \bar{A}\bar{B}x_2 + \bar{B}x_3 \\
           \Rightarrow y_3 &= C h_3 = C\bar{A}^2\bar{B}x_1 + C\bar{A}\bar{B}x_2 + C\bar{B}x_3
           \end{align*} \]
         </div>
-        
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0;">
-          <img src="img/paper/mamba/convssm1.png" alt="Conv SSM 1" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-          <img src="img/paper/mamba/convssm2.png" alt="Conv SSM 2" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-          <img src="img/paper/mamba/convssm3.png" alt="Conv SSM 3" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-          <img src="img/paper/mamba/convssm4.png" alt="Conv SSM 4" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <img src="img/paper/mamba/convssm1.png" alt="Conv SSM 1"
+            style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <img src="img/paper/mamba/convssm2.png" alt="Conv SSM 2"
+            style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <img src="img/paper/mamba/convssm3.png" alt="Conv SSM 3"
+            style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <img src="img/paper/mamba/convssm4.png" alt="Conv SSM 4"
+            style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
         </div>
 
         <p>As shown, the SSM can be calculated as a convolution with the <strong>kernel \(\bar{K}\)</strong>:</p>
@@ -515,7 +535,8 @@
           \[ y = x * \bar{K} \]
         </div>
         <div class="callout info">
-          <p><em>Characteristics:</em> This formulation allows for <strong>full parallelization</strong> during training by effectively leveraging the GPU.</p>
+          <p><em>Characteristics:</em> This formulation allows for <strong>full parallelization</strong> during training
+            by effectively leveraging the GPU.</p>
         </div>
       </section>
 
@@ -524,22 +545,25 @@
       <section id="hippo">
         <div class="section-number">Section 5</div>
         <h2>Importance of Matrix A & HIPPO</h2>
-        <p><strong>Problem:</strong> Choosing a random static matrix \(A\) fails to capture complex relationships over very long sequences.</p>
-        
-        <p><strong>Solution: The HIPPO Matrix</strong> (High-order Polynomial Projection Operators). It is similar to the concept of Fourier frequency analysis, but superior due to the use of Legendre Polynomials.</p>
+        <p><strong>Problem:</strong> Choosing a random static matrix \(A\) fails to capture complex relationships over
+          very long sequences.</p>
+
+        <p><strong>Solution: The HIPPO Matrix</strong> (High-order Polynomial Projection Operators). It is similar to
+          the concept of Fourier frequency analysis, but superior due to the use of Legendre Polynomials.</p>
         <div style="text-align:center; margin: 1.5rem 0;">
-          <img src="img/paper/mamba/fourierTransform.png" alt="Fourier Transform" style="max-width: 60%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <img src="img/paper/mamba/fourierTransform.png" alt="Fourier Transform"
+            style="max-width: 60%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
           <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">Fourier Transform</p>
         </div>
-        
-        <p><strong>Mechanism:</strong> It perfectly reconstructs the <em>most recent</em> signal instead of the entire sequence. Older signals are heavily decayed \(\rightarrow\) prioritizing the memorization of recently appeared tokens.</p>
+
+        <p><strong>Mechanism:</strong> It perfectly reconstructs the <em>most recent</em> signal instead of the entire
+          sequence. Older signals are heavily decayed \(\rightarrow\) prioritizing the memorization of recently appeared
+          tokens.</p>
         <div class="math-block">
           \[ \textbf{HiPPO Matrix:} \quad A_{nk} = - \begin{cases}
-              (2n + 1)^{1/2}(2k + 1)^{1/2} & \text{if } n > k \\
-              n + 1                        & \text{if } n = k \\
-              0                            & \text{if } n < k
-          \end{cases} \]
-        </div>
+          (2n + 1)^{1/2}(2k + 1)^{1/2} & \text{if } n > k \\
+          n + 1 & \text{if } n = k \\
+          0 & \text{if } n < k \end{cases} \] </div>
       </section>
 
       <hr>
@@ -549,8 +573,10 @@
         <h2>S4 Architecture</h2>
         <p><strong>S4</strong> = SSM + Long-range Dependencies (HIPPO) + Discretization.</p>
         <div style="text-align:center; margin: 1.5rem 0;">
-          <img src="img/paper/mamba/s4.png" alt="S4 Architecture" style="max-width: 90%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-          <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">Source: <a href="https://www.maartengrootendorst.com/blog/mamba/" target="_blank">Maarten Grootendorst</a> - S4</p>
+          <img src="img/paper/mamba/s4.png" alt="S4 Architecture"
+            style="max-width: 90%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">Source: <a
+              href="https://www.maartengrootendorst.com/blog/mamba/" target="_blank" rel="noopener noreferrer">Maarten Grootendorst</a> - S4</p>
         </div>
       </section>
 
@@ -559,19 +585,27 @@
       <section id="mamba-motivation">
         <div class="section-number">Section 7</div>
         <h2>Motivation for Mamba: Overcoming LTI Limits of S4</h2>
-        
-        <p><strong>Advantage of Static Parameters (LTI):</strong> They perform exceptionally well on copying tasks (Time Shift).</p>
+
+        <p><strong>Advantage of Static Parameters (LTI):</strong> They perform exceptionally well on copying tasks (Time
+          Shift).</p>
         <div style="text-align:center; margin: 1.5rem 0;">
-          <img src="img/paper/mamba/taskMamba.png" alt="Tasks where S4 performs well vs poorly" style="max-width: 90%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-          <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;"><em>Left: Tasks that SSM/S4 handles well. Right: Tasks that SSM/S4 struggles with.</em></p>
+          <img src="img/paper/mamba/taskMamba.png" alt="Tasks where S4 performs well vs poorly"
+            style="max-width: 90%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;"><em>Left: Tasks that SSM/S4 handles
+              well. Right: Tasks that SSM/S4 struggles with.</em></p>
         </div>
-        
-        <p><strong>Limitations of LTI:</strong> The internal state cannot alter itself based on the input context, resulting in a lack of context-aware reasoning capabilities.</p>
-        
+
+        <p><strong>Limitations of LTI:</strong> The internal state cannot alter itself based on the input context,
+          resulting in a lack of context-aware reasoning capabilities.</p>
+
         <p><strong>Failures on Complex Tasks:</strong></p>
         <ol>
-          <li><em>Selective Copying:</em> The model needs to remember key content while actively filtering out noise <strong>(Content-aware)</strong>.</li>
-          <li><em>Induction Heads:</em> The model needs to predict the future based on the contextual rules of the past <strong>(Context-aware)</strong>.</li>
+          <li><em>Selective Copying:</em> The model needs to remember key content while actively filtering out noise
+            <strong>(Content-aware)</strong>.
+          </li>
+          <li><em>Induction Heads:</em> The model needs to predict the future based on the contextual rules of the past
+            <strong>(Context-aware)</strong>.
+          </li>
         </ol>
       </section>
 
@@ -580,21 +614,26 @@
       <section id="selective-ssm">
         <div class="section-number">Section 8</div>
         <h2>Selective SSM (S6)</h2>
-        
+
         <ul>
-          <li><strong>Core Idea:</strong> the parameters are forced to be dynamic, varying based on the input \(x_t\) (Input-dependent):
+          <li><strong>Core Idea:</strong> the parameters are forced to be dynamic, varying based on the input \(x_t\)
+            (Input-dependent):
             <div class="math-block">
               \[ \boldsymbol{B}_t = \text{Linear}_B(x_t) \]
               \[ \boldsymbol{C}_t = \text{Linear}_C(x_t) \]
               \[ \boldsymbol{\Delta}_t = \text{Softplus}(\text{Parameter} + \text{Linear}_\Delta(x_t)) \]
             </div>
           </li>
-          <li><strong>Effect:</strong> Mamba gains the proactive ability to <em>ingest, retrieve, or erase memory</em> at each step \(t\) depending on the observed data.</li>
-          <li><em>Note:</em> The matrix \(\boldsymbol{A}\) remains fixed (as a static parameter) to rely on the stable HIPPO anchor for long-sequence memory and to avoid mathematical redundancy.</li>
+          <li><strong>Effect:</strong> Mamba gains the proactive ability to <em>ingest, retrieve, or erase memory</em>
+            at each step \(t\) depending on the observed data.</li>
+          <li><em>Note:</em> The matrix \(\boldsymbol{A}\) remains fixed (as a static parameter) to rely on the stable
+            HIPPO anchor for long-sequence memory and to avoid mathematical redundancy.</li>
         </ul>
         <div style="text-align:center; margin: 1.5rem 0;">
-          <img src="img/paper/mamba/algorithm.png" alt="S4 vs S6 Algorithm" style="max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-          <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">Comparison between S4 and S6 (Mamba)</p>
+          <img src="img/paper/mamba/algorithm.png" alt="S4 vs S6 Algorithm"
+            style="max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">Comparison between S4 and S6 (Mamba)
+          </p>
         </div>
       </section>
 
@@ -603,29 +642,36 @@
       <section id="scan">
         <div class="section-number">Section 9</div>
         <h2>Hardware-aware Selective Scan</h2>
-        
-        <p><strong>Challenge:</strong> The dynamic variability breaks the LTI property \(\rightarrow\) <em>We can no longer use Convolutions</em> \(\rightarrow\) We must compute sequentially. This makes it difficult to use GPUs for parallelization the way Transformers do.</p>
-        
+
+        <p><strong>Challenge:</strong> The dynamic variability breaks the LTI property \(\rightarrow\) <em>We can no
+            longer use Convolutions</em> \(\rightarrow\) We must compute sequentially. This makes it difficult to use
+          GPUs for parallelization the way Transformers do.</p>
+
         <h3>Hardware-aware Selective Scan Algorithm</h3>
         <ol>
-          <li><strong>Parallel Scan:</strong> Leverages the <em>associative</em> property of the sequential system to chunk and cluster computations across multiple threads on the GPU.</li>
-          <li><strong>System Memory Optimization (SRAM):</strong> Executes the mathematical operations directly inside the fast SRAM, avoiding the heavy latency from the memory I/O bottleneck (HBM) on the GPU.</li>
+          <li><strong>Parallel Scan:</strong> Leverages the <em>associative</em> property of the sequential system to
+            chunk and cluster computations across multiple threads on the GPU.</li>
+          <li><strong>System Memory Optimization (SRAM):</strong> Executes the mathematical operations directly inside
+            the fast SRAM, avoiding the heavy latency from the memory I/O bottleneck (HBM) on the GPU.</li>
         </ol>
-        
+
         <h3>Parallel Scan Illustration</h3>
         <p>Illustrating the idea through the Prefix Sum example:</p>
         <div style="text-align:center; margin: 1.5rem 0;">
-          <img src="img/paper/mamba/prefixSum.png" alt="Prefix Sum" style="max-width: 90%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <img src="img/paper/mamba/prefixSum.png" alt="Prefix Sum"
+            style="max-width: 90%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
         </div>
-        
+
         <p>Illustration during <strong>Training</strong>:</p>
         <div style="text-align:center; margin: 1.5rem 0;">
-          <img src="img/paper/mamba/fullParallelScan.png" alt="Full Parallel Scan" style="max-width: 90%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <img src="img/paper/mamba/fullParallelScan.png" alt="Full Parallel Scan"
+            style="max-width: 90%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
         </div>
-        
+
         <p>Illustration during <strong>Inference</strong>:</p>
         <div style="text-align:center; margin: 1.5rem 0;">
-          <img src="img/paper/mamba/upSweepParallelScan.png" alt="Up-Sweep Parallel Scan" style="max-width: 90%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <img src="img/paper/mamba/upSweepParallelScan.png" alt="Up-Sweep Parallel Scan"
+            style="max-width: 90%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
         </div>
       </section>
 
@@ -635,19 +681,54 @@
         <div class="section-number">Section 10</div>
         <h2>Mamba Block</h2>
         <div style="text-align:center; margin: 1.5rem 0;">
-          <img src="img/paper/mamba/mambaBlock.png" alt="Mamba Block" style="max-width: 80%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <img src="img/paper/mamba/mambaBlock.png" alt="Mamba Block"
+            style="max-width: 80%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
         </div>
         <ul>
           <li>These blocks are stacked in multiple layers, similar to a Transformer architecture.</li>
-          <li><strong>Causal Convolution:</strong> A small Conv1d layer is included to provide local contextual information, effectively establishing causality and preventing the model from <em>looking ahead into the future</em>.</li>
-          <li>It integrates Normalization, SiLU activations, a split-branch structure, and output linear projections.</li>
+          <li><strong>Causal Convolution:</strong> A small Conv1d layer is included to provide local contextual
+            information, effectively establishing causality and preventing the model from <em>looking ahead into the
+              future</em>.</li>
+        </ul>
+      </section>
+
+      <hr>
+
+      <section id="references">
+        <div class="section-number">Section 11</div>
+        <h2>References</h2>
+        <ul>
+          <li><a href="https://www.youtube.com/watch?v=8Q_tqwpTpVU" target="_blank" rel="noopener">Mamba and S4
+              Explained: Architecture, Parallel Scan, Kernel Fusion, Recurrent, Convolution, Math</a> (Umar Jamil,
+            2024).</li>
+          <li><a href="https://www.maartengrootendorst.com/blog/mamba/" target="_blank" rel="noopener">A Visual Guide to
+              Mamba and State Space Models</a> (Maarten Grootendorst, 2023).</li>
+          <li><a href="https://en.wikipedia.org/wiki/Bilinear_transform" target="_blank" rel="noopener">Bilinear
+              transform</a> (Wikipedia contributors, 2026).</li>
+          <li><a href="https://en.wikipedia.org/wiki/Zero-order_hold" target="_blank" rel="noopener">Zero-order hold</a>
+            (Wikipedia contributors, 2026).</li>
+          <li><a href="https://en.wikipedia.org/wiki/Fourier_transform" target="_blank" rel="noopener">Fourier
+              transform</a> (Wikipedia contributors, 2026).</li>
+          <li><a href="https://openreview.net/forum?id=uYLFoz1vlAC" target="_blank" rel="noopener">Efficiently Modeling
+              Long Sequences with Structured State Spaces</a> (Albert Gu, Karan Goel, Christopher Ré, ICLR 2022).</li>
+          <li><a
+              href="https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing/chapter-39-parallel-prefix-sum-scan-cuda"
+              target="_blank" rel="noopener">Parallel Prefix Sum (Scan) with CUDA</a> (Mark Harris, Shubhabrata
+            Sengupta, John D. Owens, GPU Gems 3, 2007).</li>
+          <li><a href="https://www.cs.cmu.edu/~guyb/papers/Ble93.pdf" target="_blank" rel="noopener">Prefix Sums and
+              Their Applications</a> (Guy E. Blelloch, 1993).</li>
+          <li><a href="https://arxiv.org/abs/2212.14052" target="_blank" rel="noopener">Hungry Hungry Hippos: Towards
+              Language Modeling with State Space Models</a> (Tri Dao et al., 2022).</li>
+          <li><a href="https://arxiv.org/abs/2312.00752" target="_blank" rel="noopener">Mamba: Linear-Time Sequence
+              Modeling with Selective State Spaces</a> (Albert Gu, Tri Dao, 2023).</li>
         </ul>
       </section>
 
     </main>
   </div>
 
-  <footer style="text-align:center; padding:2rem; border-top:1px solid var(--border); color:var(--muted); font-size:0.82rem;">
+  <footer
+    style="text-align:center; padding:2rem; border-top:1px solid var(--border); color:var(--muted); font-size:0.82rem;">
     tawannt.github.io · <a href="index.html">← Back to Home</a>
   </footer>
 

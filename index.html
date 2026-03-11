@@ -228,6 +228,28 @@
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      /* inherit from body */
+      appearance: none;
+      /* reset button system style */
+    }
+
+    .topic-chip:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+    }
+
+    .topic-chip:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .topic-chip.active {
+      background: rgba(79, 158, 255, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
     /* ── Note cards ─────────────────────────────────────── */
@@ -238,8 +260,8 @@
     }
 
     .notes-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      display: flex;
+      flex-direction: column;
       gap: 1.2rem;
     }
 
@@ -251,7 +273,7 @@
       text-decoration: none;
       display: flex;
       flex-direction: column;
-      gap: 0.8rem;
+      gap: 0.6rem;
       transition: border-color 0.25s, transform 0.2s, box-shadow 0.25s;
     }
 
@@ -264,16 +286,35 @@
 
     .note-card-top {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      gap: 0.6rem;
+      gap: 1rem;
+    }
+
+    .note-title-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .note-date {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
     }
 
     .note-card h3 {
-      font-size: 1rem;
+      font-size: 1.15rem;
       font-weight: 600;
       color: #fff;
       line-height: 1.4;
+      margin: 0;
+    }
+
+    .note-card:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
     .note-arrow {
@@ -281,6 +322,7 @@
       font-size: 1rem;
       flex-shrink: 0;
       transition: color 0.2s, transform 0.2s;
+      user-select: none;
     }
 
     .note-card:hover .note-arrow {
@@ -323,45 +365,9 @@
       color: #34d399;
     }
 
-    /* ── Featured card ──────────────────────────────────── */
-    .note-card.featured {
-      border-color: rgba(79, 158, 255, 0.2);
-      background: linear-gradient(135deg, #161b24, #1a2235);
-      grid-column: 1 / -1;
-      flex-direction: row;
-      align-items: center;
-      gap: 2rem;
-    }
-
-    .note-card.featured .note-body {
-      flex: 1;
-    }
-
-    .note-card.featured h3 {
-      font-size: 1.15rem;
-    }
-
-    .featured-badge {
-      display: inline-block;
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--accent);
-      background: rgba(79, 158, 255, 0.1);
-      border: 1px solid rgba(79, 158, 255, 0.25);
-      border-radius: 100px;
-      padding: 2px 10px;
-      margin-bottom: 0.5rem;
-    }
-
     @media (max-width: 600px) {
-      .notes-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .note-card.featured {
-        flex-direction: column;
+      .note-card {
+        padding: 1.2rem 1.4rem;
       }
     }
 
@@ -408,13 +414,19 @@
   <main>
 
     <!-- Topics -->
-    <div class="section-label">Interests</div>
+    <div class="section-label">Filter by Topic</div>
     <div class="topics">
-      <span class="topic-chip">Computer Vision</span>
-      <span class="topic-chip">Object Detection</span>
-      <span class="topic-chip">Vision-Language Models</span>
-      <span class="topic-chip">Statistics &amp; Probability</span>
-      <span class="topic-chip">Machine Learning</span>
+      <button type="button" class="topic-chip" data-filter="computer-vision" aria-pressed="false">Computer
+        Vision</button>
+      <button type="button" class="topic-chip" data-filter="object-detection" aria-pressed="false">Object
+        Detection</button>
+      <button type="button" class="topic-chip" data-filter="vision-language"
+        aria-pressed="false">Vision-Language</button>
+      <button type="button" class="topic-chip" data-filter="state-space-model" aria-pressed="false">State-Space
+        Model</button>
+      <button type="button" class="topic-chip" data-filter="rnn" aria-pressed="false">Recurrent Neural Network</button>
+      <button type="button" class="topic-chip" data-filter="statistics" aria-pressed="false">Statistics</button>
+      <button type="button" class="topic-chip" data-filter="probability" aria-pressed="false">Probability</button>
     </div>
 
     <hr class="divider">
@@ -427,44 +439,56 @@
 
       <div class="notes-grid">
 
-        <!-- Featured: YOLO-World -->
-        <a href="yolo_world.html" class="note-card featured" id="card-yolo-world">
-          <div class="note-body">
-            <div class="featured-badge">Featured</div>
-            <h3>YOLO-World: Real-Time Open-Vocabulary Object Detection</h3>
-            <p class="note-desc">
-              A deep dive into how YOLO-World bridges YOLO's real-time speed with open-vocabulary flexibility —
-              covering RepVL-PAN, region-text contrastive matching, the auto-labeling pipeline,
-              re-parameterization, and demo comparisons.
-            </p>
-            <div class="note-tags" style="margin-top:0.6rem;">
-              <span class="tag tag-blue">Computer Vision</span>
-              <span class="tag tag-purple">Object Detection</span>
-              <span class="tag tag-green">Vision-Language</span>
-            </div>
-          </div>
-          <span class="note-arrow">→</span>
-        </a>
-
-        <!-- Mamba SSM -->
-        <a href="mamba_ssm.html" class="note-card" id="card-mamba-ssm">
+        <!-- YOLO-World -->
+        <a href="yolo_world.html" class="note-card" id="card-yolo-world" data-src="yolo_world.html"
+          data-tags="computer-vision object-detection vision-language">
           <div class="note-card-top">
-            <h3>State Space Models & Mamba</h3>
+            <div class="note-title-section">
+              <span class="note-date">…</span>
+              <h3>YOLO-World: Real-Time Open-Vocabulary Object Detection</h3>
+            </div>
             <span class="note-arrow">→</span>
           </div>
           <p class="note-desc">
-            A comprehensive overview of State Space Models, discretization, the HiPPO matrix, and the Mamba architecture.
+            A deep dive into how YOLO-World bridges YOLO's real-time speed with open-vocabulary flexibility —
+            covering RepVL-PAN, region-text contrastive matching, the auto-labeling pipeline,
+            re-parameterization, and demo comparisons.
           </p>
           <div class="note-tags">
-            <span class="tag tag-blue">Architecture</span>
-            <span class="tag tag-purple">Deep Learning</span>
+            <span class="tag tag-blue">Computer Vision</span>
+            <span class="tag tag-purple">Object Detection</span>
+            <span class="tag tag-green">Vision-Language</span>
+          </div>
+        </a>
+
+        <!-- Mamba SSM -->
+        <a href="mamba_ssm.html" class="note-card" id="card-mamba-ssm" data-src="mamba_ssm.html"
+          data-tags="state-space-model rnn architecture deep-learning">
+          <div class="note-card-top">
+            <div class="note-title-section">
+              <span class="note-date">…</span>
+              <h3>State Space Models & Mamba</h3>
+            </div>
+            <span class="note-arrow">→</span>
+          </div>
+          <p class="note-desc">
+            A comprehensive overview of State Space Models, discretization, the HiPPO matrix, and the Mamba
+            architecture.
+          </p>
+          <div class="note-tags">
+            <span class="tag tag-blue">State-Space Model</span>
+            <span class="tag tag-purple">RNN</span>
           </div>
         </a>
 
         <!-- Likelihood & MLE -->
-        <a href="likelihood_mle.html" class="note-card" id="card-mle">
+        <a href="likelihood_mle.html" class="note-card" id="card-mle" data-src="likelihood_mle.html"
+          data-tags="statistics probability">
           <div class="note-card-top">
-            <h3>What is Likelihood and MLE?</h3>
+            <div class="note-title-section">
+              <span class="note-date">…</span>
+              <h3>What is Likelihood and MLE?</h3>
+            </div>
             <span class="note-arrow">→</span>
           </div>
           <p class="note-desc">
@@ -486,6 +510,69 @@
     tawannt.github.io · Built with HTML &amp; CSS
   </footer>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const grid = document.querySelector('.notes-grid');
+      const cards = Array.from(grid.querySelectorAll('.note-card[data-src]'));
+
+      // Parse 'dd/mm/yyyy' → Date object
+      const parseDate = (str) => {
+        const [d, m, y] = str.split('/');
+        return new Date(Number(y), Number(m) - 1, Number(d)); // avoids UTC offset issues
+      };
+
+      // Fetch hero-date from each individual note page
+      const fetchDate = (card) => {
+        return fetch(card.dataset.src)
+          .then(r => r.text())
+          .then(html => {
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const raw = doc.querySelector('.hero-date')?.textContent?.trim() ?? '';
+            return { card, raw };
+          })
+          .catch(() => ({ card, raw: '' })); // graceful fallback
+      };
+
+      // Run all fetches in parallel, then sort and attach filter
+      Promise.all(cards.map(fetchDate)).then(results => {
+        // Inject fetched dates into cards
+        results.forEach(({ card, raw }) => {
+          const span = card.querySelector('.note-date');
+          if (span) span.textContent = raw || '—';
+          // Store ISO-comparable value for sorting
+          card.dataset.date = raw ? parseDate(raw).valueOf() : 0;
+        });
+
+        // Sort descending (newest first)
+        results
+          .sort((a, b) => (b.card.dataset.date ?? 0) - (a.card.dataset.date ?? 0))
+          .forEach(({ card }) => grid.appendChild(card));
+
+        // --- Filtering Logic (after sort so `cards` ref is fresh) ---
+        const allCards = Array.from(grid.querySelectorAll('.note-card'));
+        const chips = document.querySelectorAll('.topic-chip');
+
+        chips.forEach(chip => {
+          chip.addEventListener('click', () => {
+            const isActive = chip.classList.toggle('active');
+            chip.setAttribute('aria-pressed', String(isActive)); // a11y sync
+
+            const activeFilters = Array.from(document.querySelectorAll('.topic-chip.active'))
+              .map(c => c.dataset.filter);
+
+            allCards.forEach(card => {
+              if (activeFilters.length === 0) {
+                card.style.display = '';
+                return;
+              }
+              const cardTags = (card.dataset.tags || '').split(' ');
+              card.style.display = activeFilters.some(f => cardTags.includes(f)) ? '' : 'none';
+            });
+          });
+        });
+      });
+    });
+  </script>
 </body>
 
 </html>
