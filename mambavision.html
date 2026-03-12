@@ -510,10 +510,14 @@
             style="max-width: 80%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
         </div>
         <ul>
-          <li><strong>Stem (Processing):</strong> Uses 2 Convolutional Layers to scale down resolution (\(H/4, W/4\)).
+          <li><strong>Stem (Processing):</strong> Uses 2 Convolutional Layers with stride 2 to scale down
+            resolution
+            (\(H/4, W/4\)).
           </li>
           <li><strong>Stages 1 & 2 (Feature Extraction):</strong> Applies standard Residual CNNs for ultra-fast feature
-            extraction.</li>
+            extraction. This also helps to learn local features of the image, which is important for next step - using
+            MambaMixer block - to connect these local representions/feature maps via parallel scanning by SSM. This step
+            and Self-attention help to learn Global features or the connection.</li>
           <li><strong>Stages 3 & 4 (Context Modeling):</strong> advances the computation of global dependencies using a
             hybrid mixture of <strong>MambaVision Mixers</strong> and standard <strong>Transformers</strong>.</li>
         </ul>
@@ -527,9 +531,10 @@
           <div>
             <p>The block is redesigned to adapt to non-causal image sequences:</p>
             <ul>
-              <li><strong>Standard 1D Conv:</strong> Replaces Causal Convolutions to capture symmetric context from both
+              <li><strong>Standard 1D Conv:</strong> Replaces Causal Convolutions (in original Mamba block) to capture
+                symmetric context from both
                 directions.</li>
-              <li><strong>Symmetric Branch:</strong> Adds a parallel path (Conv + SiLU) to compensate for the
+              <li><strong>Symmetric Branch:</strong> Updates a parallel path (Conv + SiLU) to compensate for the
                 information lost in the sequential SSM branch.</li>
               <li><strong>Merge:</strong> The two branches are concatenated and passed through a linear projection
                 layer.</li>
@@ -556,6 +561,9 @@
           <img src="img/paper/mambavision/table4.png" alt="Ablation on Block Design"
             style="max-width: 50%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
         </div>
+        <p>This experiment shows that the most optimal Block design is the one with 2 conv operations (instead of causal
+          conv) in 2 branches (compared to 1 branch in Mamba) and using concatenation (instead of element-wise
+          multiplication) to merge the two branches.</p>
 
         <h3 id="integration">Integration of Self-Attention and MLP Blocks</h3>
         <div style="text-align:center; margin: 1.5rem 0;">
