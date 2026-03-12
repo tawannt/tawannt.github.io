@@ -365,6 +365,21 @@
       color: #34d399;
     }
 
+    .tag-orange {
+      background: rgba(251, 146, 60, 0.15);
+      color: #fb923c;
+    }
+
+    .tag-pink {
+      background: rgba(244, 114, 182, 0.15);
+      color: #f472b6;
+    }
+
+    .tag-red {
+      background: rgba(248, 113, 113, 0.15);
+      color: #f87171;
+    }
+
     @media (max-width: 600px) {
       .note-card {
         padding: 1.2rem 1.4rem;
@@ -420,10 +435,14 @@
         Vision</button>
       <button type="button" class="topic-chip" data-filter="object-detection" aria-pressed="false">Object
         Detection</button>
+      <button type="button" class="topic-chip" data-filter="semantic-segmentation" aria-pressed="false">Semantic
+        Segmentation</button>
       <button type="button" class="topic-chip" data-filter="vision-language"
         aria-pressed="false">Vision-Language</button>
       <button type="button" class="topic-chip" data-filter="state-space-model" aria-pressed="false">State-Space
         Model</button>
+      <button type="button" class="topic-chip" data-filter="image-classification" aria-pressed="false">Image
+        Classification</button>
       <button type="button" class="topic-chip" data-filter="rnn" aria-pressed="false">Recurrent Neural Network</button>
       <button type="button" class="topic-chip" data-filter="statistics" aria-pressed="false">Statistics</button>
       <button type="button" class="topic-chip" data-filter="probability" aria-pressed="false">Probability</button>
@@ -454,7 +473,10 @@
           </p>
           <div class="note-tags">
             <span class="tag tag-blue">Computer Vision</span>
+            <span class="tag tag-green">Object Detection</span>
             <span class="tag tag-purple">State-Space Model</span>
+            <span class="tag tag-pink">Semantic Segmentation</span>
+            <span class="tag tag-orange">Image Classification</span>
           </div>
         </a>
 
