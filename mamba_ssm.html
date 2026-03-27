@@ -683,6 +683,60 @@
           <img src="img/paper/mamba/upSweepParallelScan.png" alt="Up-Sweep Parallel Scan"
             style="max-width: 85%; border-radius: var(--radius-sm); border: 1px solid var(--border);">
         </div>
+
+        <h3>Mathematical Verification: Sequential vs. Parallel Scan</h3>
+        <p>To cement how the parallel scan yields the exact same state as the recurrent loop, let's manually verify it
+          for the first few steps.</p>
+
+        <p>First, we define our recurrence relation. Let \( u_t = B_t x_t \), and assume the initial state is evaluated
+          as \( h_0 = u_0 \):</p>
+        <div class="math-block">
+          \[ h_t = A_t h_{t-1} + u_t \]
+        </div>
+
+        <p><strong>1. Sequential Computation:</strong><br>
+          If we process this standardly one step at a time, we accumulate the state sequentially:</p>
+        <div class="math-block">
+          \[ \begin{align*}
+          h_1 &= A_1 h_0 + u_1 = A_1 u_0 + u_1 \\
+          h_2 &= A_2 h_1 + u_2 = A_2 (A_1 u_0 + u_1) + u_2 = A_2 A_1 u_0 + A_2 u_1 + u_2 \\
+          h_3 &= A_3 h_2 + u_3 = A_3 (A_2 A_1 u_0 + A_2 u_1 + u_2) + u_3 \\
+          &\Rightarrow h_3 = A_3 A_2 A_1 u_0 + A_3 A_2 u_1 + A_3 u_2 + u_3
+          \end{align*} \]
+        </div>
+
+        <p><strong>2. Parallel Scan Computation:</strong><br>
+          Now, instead of iterating one-by-one, we define a tuple \( P_i = (A_i, u_i) \) and an <strong>associative
+            composition operator</strong> \(\circ\) :</p>
+        <div class="math-block">
+          \[ \underbrace{(A_j, u_j)}_{P_j} \circ \underbrace{(A_i, u_i)}_{P_i} = (A_j A_i, \ A_j u_i + u_j) \]
+        </div>
+
+        <p>By chunking our operations, we can compute sub-sequences in parallel. For instance, computing two chunks
+          independently:</p>
+        <div class="math-block">
+          \[ \begin{cases}
+          P_{0 \rightarrow 1} = P_1 \circ P_0 = (A_1, u_1) \circ (A_0, u_0) = (A_1 A_0, \ A_1 u_0 + u_1) \\
+          P_{2 \rightarrow 3} = P_3 \circ P_2 = (A_3, u_3) \circ (A_2, u_2) = (A_3 A_2, \ A_3 u_2 + u_3)
+          \end{cases} \]
+        </div>
+
+        <p>Next, we compose these two intermediate results together:</p>
+        <div class="math-block">
+          \[ \begin{align*}
+          P_{0\rightarrow 3} &= P_{2\rightarrow 3} \circ P_{0\rightarrow 1} \\
+          &= (A_3 A_2, \ A_3 u_2 + u_3) \circ (A_1 A_0, \ A_1 u_0 + u_1) \\
+          &= (A_3 A_2 \cdot A_1 A_0, \ A_3 A_2 (A_1 u_0 + u_1) + A_3 u_2 + u_3) \\
+          &= (A_3 A_2 A_1 A_0, \ A_3 A_2 A_1 u_0 + A_3 A_2 u_1 + A_3 u_2 + u_3)
+          \end{align*} \]
+        </div>
+
+        <div class="callout info">
+          <p><strong>Takeaway:</strong> Notice how the second element of the resulting tuple \( P_{0\rightarrow 3} \) is
+            exactly equal to \( h_3 \).
+            This proves that by mapping our recurrence to an associative operator, we can compute the highly sequential
+            hidden states in parallel chunks without any accuracy loss!</p>
+        </div>
       </section>
 
       <hr>
