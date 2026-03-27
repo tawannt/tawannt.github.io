@@ -779,8 +779,8 @@
                                         channels in half: <code>[B, C &div; 2, T]</code>.</li>
                                     <li style="margin-top: 0.5rem;"><strong>Activation ($\sigma$):</strong> Passes
                                         through an ELU.</li>
-                                    <li style="margin-top: 0.5rem;"><strong>Restoration Conv:</strong> A wider filter
-                                        $k=1, d=1$ immediately pumps the channel topology back up to its original
+                                    <li style="margin-top: 0.5rem;"><strong>Restoration Conv:</strong> A filter
+                                        $k=1, d=1$ immediately restores the channel topology back to its original
                                         boundary size of <code>[B, C, T]</code>.</li>
                                     <li style="margin-top: 0.5rem;"><strong>Activation ($\sigma$):</strong> Passes
                                         through another ELU.</li>
