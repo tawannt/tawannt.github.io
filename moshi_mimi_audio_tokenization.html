@@ -17,7 +17,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Moshi: Unified Speech-Text. Dialogue Model (part 1 - Mimi Audio Tokenization) — tawannt.github.io</title>
+    <title>Moshi: Unified Speech-Text Dialogue Model (part 1 - Mimi Audio Tokenization) — tawannt.github.io</title>
     <meta name="description"
         content="Architecture of the Audio Compressor (SEANet Encoder) in Mimi, transforming raw audio waves into ultra-compressed frames.">
 
@@ -758,32 +758,44 @@
                     called the <span class="tag tag-orange">Bottleneck</span> architecture combined seamlessly with a
                     <span class="tag tag-green">Skip-Connection</span>.
                 </p>
+                <p>Starting with an input of shape <code>[B, C, T]</code> (where $C = m \times 64 = 2^{n-1}
+                    \times 64$),
+                    the cascading data splits:</p>
 
                 <div
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; align-items: center; margin-top: 1.5rem;">
                     <div>
-                        <p>Starting with an input of shape <code>[B, C, T]</code> (where $C = m \times 64 = 2^{n-1}
-                            \times 64$),
-                            the cascading data splits:</p>
+                        <div style="margin-top: 1.5rem;">
+                            <!-- Main Branch -->
+                            <div style="margin-bottom: 2rem;">
+                                <strong><span class="tag tag-blue" style="font-size: 0.85em; padding: 2px 6px;">The
+                                        Main Processing Branch</span></strong>
+                                <p style="margin-top: 0.5rem; color: var(--text);">Designed to accelerate calculation
+                                    speeds via a <span class="tag tag-orange">Bottleneck</span> strategy. The processing
+                                    occurs in 4 sequential micro-steps:</p>
+                                <ul
+                                    style="margin-top: 0.8rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.95em;">
+                                    <li><strong>Narrowing Conv:</strong> Applies $k=3, d=1$ to sharply compress the
+                                        channels in half: <code>[B, C &div; 2, T]</code>.</li>
+                                    <li style="margin-top: 0.5rem;"><strong>Activation ($\sigma$):</strong> Passes
+                                        through an ELU.</li>
+                                    <li style="margin-top: 0.5rem;"><strong>Restoration Conv:</strong> A wider filter
+                                        $k=1, d=1$ immediately pumps the channel topology back up to its original
+                                        boundary size of <code>[B, C, T]</code>.</li>
+                                    <li style="margin-top: 0.5rem;"><strong>Activation ($\sigma$):</strong> Passes
+                                        through another ELU.</li>
+                                </ul>
+                            </div>
 
-                        <ul>
-                            <li>
-                                <strong>The Main Processing Branch:</strong> Designed to accelerate calculation speeds.
-                                The
-                                first <code>Conv</code> (with $k=1$, $d=1$) sharply narrows the channels securely in
-                                half to
-                                exactly <code>[B, C &div; 2, T]</code>. It passes an ELU activation ($\sigma$), then a
-                                second
-                                wider <code>Conv</code> ($k=3$, $d=1$) pumps the channel topology right back up to its
-                                original
-                                boundary size of <code>[B, C, T]</code>, immediately followed by another $\sigma$.
-                            </li>
-                            <li style="margin-top: 0.8rem;">
-                                <strong>The Skip-Connection Branch:</strong> The undisturbed native data flows straight
-                                from the
-                                block entrance, bypassing transformations.
-                            </li>
-                        </ul>
+                            <!-- Skip-Connection Branch -->
+                            <div>
+                                <strong><span class="tag tag-green" style="font-size: 0.85em; padding: 2px 6px;">The
+                                        Skip-Connection Branch</span></strong>
+                                <p style="margin-top: 0.5rem; color: var(--text);">The undisturbed native data flows
+                                    straight from the block entrance to its exit, completely bypassing the
+                                    transformations.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="main-img-card" style="margin: 0; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);">
