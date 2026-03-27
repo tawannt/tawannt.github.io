@@ -644,6 +644,40 @@
           <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">Comparison between S4 and S6 (Mamba)
           </p>
         </div>
+
+        <h3>Dimensionality Analysis</h3>
+        <p>Looking closely at the algorithms above, we can notice a significant shift in the tensor dimensions between
+          S4 and S6. Here is a breakdown of what these variables represent:</p>
+        <ul>
+          <li><strong>B:</strong> Batch size</li>
+          <li><strong>L:</strong> Sequence length</li>
+          <li><strong>D:</strong> Hidden dimension of the input model</li>
+          <li><strong>N:</strong> SSM State dimension (typically small, e.g., 16)</li>
+        </ul>
+
+        <p>In S4 (Algorithm 1), the parameters \(\boldsymbol{B}\), \(\boldsymbol{C}\), and \(\boldsymbol{\Delta}\) are
+          independent of the batch size and sequence length. Their dimensions only involve \(D\) and \(N\), making them
+          <strong>time-invariant</strong> (static across the sequence). This property is what permits the sequence to be
+          processed via fast global convolution.
+        </p>
+
+        <p>However, in S6 (Algorithm 2), notice the structural changes highlighted in red:</p>
+        <ul>
+          <li>\(\boldsymbol{B}\) and \(\boldsymbol{C}\) expand to \((B, L, N)\).</li>
+          <li>The step size \(\boldsymbol{\Delta}\) expands from \((D)\) to \((B, L, D)\).</li>
+          <li>Consequently, the discretized matrices \(\boldsymbol{\bar{A}}\) and \(\boldsymbol{\bar{B}}\) balloon to
+            the massive tensor size \((B, L, D, N)\), creating a severe memory bottleneck if materialized explicitly.
+          </li>
+        </ul>
+
+        <div class="callout info">
+          <p><strong>Feedback & Implications:</strong> Because these parameters now include the sequence length \(L\)
+            and batch \(B\), they become unique for <em>every single token</em> in the sequence based on the input
+            space. This is precisely what grants Mamba its powerful <em>context-aware reasoning</em> ability (allowing
+            it to selectively forget or remember). The underlying trade-off is that since the matrices change
+            dynamically at every time step, we completely lose the ability to use standard Convolutions. This specific
+            roadblock motivates the solution presented in the next section: the Hardware-aware Parallel Scan.</p>
+        </div>
       </section>
 
       <hr>
